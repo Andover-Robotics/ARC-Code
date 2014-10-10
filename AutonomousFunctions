@@ -19,12 +19,18 @@
 
 int wheelCircumference = 0;
 int rampLength = 0;
-int linSlideGearCircumference = 4*PI;
+float linSlideGearCircumference = 4*PI;
 int linSlideHeight = 28;
-int linSlideTicks = (1440 * linSlideGearCircumference)/linSlideHeight;
+int linSlideTicks = (1440 * linSlideHeight)/linSlideGearCircumference;
 int armTicks;
 int armJointTipped;
 int armJointUp;
+
+int red;
+int blue;
+
+bool armFullExtension = true;
+bool bucketDrop = true;
 
 #include "JoystickDriver.c"
 
@@ -36,9 +42,11 @@ void clear(){
 }
 task tipArm(){
 	servo[ArmJoint] = armJointTipped;
+	bucketDrop = true;
 }
 task resetArm(){
 	servo[ArmJoint] = armJointUp;	
+	bucketDrop = false;
 }
 void driveStraight(int in){
 	while(nMotorEncoder[Left] < (in*(wheelCircumference/1440))){
@@ -67,10 +75,18 @@ task lowerArm(){
 	}
 }
 task extendArm(){
-	
+	while(HTCS2readColor(ColorSensor) != red){
+		servo[ArmExtend] = 194;
+	}
+	servo[ArmExtend] = 127;
+	armFullExtension = true;
 }
 task retractArm(){
-	
+	while(HTCS2readColor(ColorSensor) != blue){
+		servo[ArmExtend] = 60;
+	}
+	servo[ArmExtend] = 127;
+	armFullExtension = false;
 }
 void initiallize(){
 	StartTask(retractArm);
@@ -78,7 +94,10 @@ void initiallize(){
 }
 task main(){
 	initiallize();
-	
+	if(armFullExtension == false && bucketDrop == false){
+		StopTask(retractArm);
+		Stop Task(resetArm);
+	}
  	waitForStart();
 	
 }
