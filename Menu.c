@@ -16,6 +16,7 @@ string programs[] = {"Text 1", "Text 2", "Text 3", "Text 4"};
 int i = 0;
 
 void menu(){
+	i = 0;
 	nxtDisplayCenteredTextLine(0, "Select program.");
 	while(1){
 		nxtDisplayCenteredTextLine(3, "%s", programs[i]);
@@ -30,17 +31,17 @@ void menu(){
 			wait1Msec(500);
 		}
 		if(nNxtButtonPressed == 3){
+			eraseDisplay();
+			nxtDisplayCenteredTextLine(1, "Selected");
+			nxtDisplayCenteredTextLine(2, "program:");
+			nxtDisplayCenteredTextLine(3, "%s", programs[i]);
+			wait1Msec(3000);
 			break;
 		}
 	}
-	eraseDisplay();
-	nxtDisplayCenteredTextLine(1, "Selected");
-	nxtDisplayCenteredTextLine(2, "program:");
-	nxtDisplayCenteredTextLine(3, "%s", programs[i]);
 }
 
 task main()
 {
 	menu();
-	wait1Msec(3000);
 }
