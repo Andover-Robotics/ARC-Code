@@ -16,5 +16,6 @@
 
 task main(){
   motor[ArmMotor] = 80;
+  motor[LinearSlide] = 80;
   wait10Msec(100);
 }
