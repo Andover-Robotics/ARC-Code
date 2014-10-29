@@ -24,7 +24,7 @@ version .03, 10/27/2014
 */
 
 #include "JoystickDriver.c"														//Needed for waitForStart
-#include "hitechnic-colour-v2.h"											//Color Sensor Drivers, unsure if will be used
+//#include "hitechnic-colour-v2.h"										//Color Sensor Drivers, unsure if will be used
 
 int rampLength;																				//Denotes Ramp Length in inches
 float wheel = 6.5*PI;																	//Denotes Wheel Circumference in inches
@@ -47,18 +47,18 @@ void driveStraight(int in){														//Drives straight for desired inches (d
 	wait1Msec(500);																			//waits for half a second
 }
 void turn(int deg){																		//turns the robot at a specified angle
-	if(deg > 0){
+	if(deg > 0){																				//if turning at a positive angle
 		while(nMotorEncoder[R]<
-			((deg/360)*(driveTicks*1.5*PI))){
-			motor[R] = 65;
-			motor[L] = -65;
+			((deg/360)*(driveTicks*1.5*PI))){								//while the encoder reads having not driven enough to turn this amount of degrees
+			motor[R] = 65;																	//Right motor at power 65
+			motor[L] = -65;																	//Left motor at power -65
 		}
 	}
-	if(deg < 0){
+	if(deg < 0){																				//if turning at a negative angle
 		while(nMotorEncoder[R] >
-			((deg/360)*(driveTicks*1.5*PI))){
-				motor[R] = -65;
-				motor[L] = 65;
+			((deg/360)*(driveTicks*1.5*PI))){								//while the encoder is greater than the negative number of ticks needed to be driven to turn such an angle
+				motor[R] = -65;																//Right motor at power -65
+				motor[L] = 65;																//Left motor ar power 65
 		}
 	}
 }
@@ -71,15 +71,15 @@ void circle(bool dir){																//Drives the robot in a circle or until it
 			int r = 0;																			//int r is the amount added to the power of the right motor to fix the ratio
 			motor[L] = 88;																	//sets the power of the left motor to 88
 			motor[R] = 40 + r;															//sets the power of the right motor to 40 + r
-			if(nMotorEncoder[L]/nMotorEncoder[R] < 2.2){
-				r+=-1;
+			if(nMotorEncoder[L]/nMotorEncoder[R] < 2.2){		//if the ratio between the encoders is less than 2.2
+				r+=-1;																				//add -1 to power of right motor
 			}
-			if(nMotorEncoder[L]/nMotorEncoder[R] > 2.2){
-				r+=1;
+			if(nMotorEncoder[L]/nMotorEncoder[R] > 2.2){		//if the ratio between the encoders is greater than 2.2
+				r+=1;																					//add 1 to power of right motor
 			}
 		}
 	}
-	if(dir == false){
+	if(dir == false){																		//if path should opt right
 		while(nMotorEncoder[R] <
 		(driveTicks*circumference) ||											//While the encoder hasn't circumnavigated the center goal and the IR Sensor hasn't detected anything
 			SensorValue[IRSensor] != 5){
@@ -97,9 +97,9 @@ void circle(bool dir){																//Drives the robot in a circle or until it
 	clear();
 }
 
-task main(){                      
-	bool taskBool[3];                                   //Determines whether or not a certain task gets enacted
-	string taskList[] = 
+task main(){
+	bool taskBool[4];                                   //Determines whether or not a certain task gets enacted
+	string taskList[] =
 	  {"Ramp", "IR", "Kickstand"};                      //List of different tasks
 	int i = 0;                                          //denotes how many tasks have been decided upon by the user
 	while(i < 3){                                       //while number of tasks decided on is less than total number of tasks
@@ -122,12 +122,35 @@ task main(){
 	}
 	nxtDisplayCenteredTextLine(3, "Ready");             //Once all decisions are made, set robot to ready
 	waitForStart();                                     //Wait for SamoFCS to send ready signal
-	switch(taskBool[0] == true){
+	switch(taskBool[0]){
 	  case true:
 	    driveStraight(rampLength);
 	    break;
 	  case false:
-	    
+
 	    break;
 	}
+	wait10Msec(50);
+	switch(taskBool[1]){
+		case true:
+			circle(taskBool[0]);
+			break;
+		case false:
+			break;
+	}
+	wait10Msec(50);
+	switch(taskBool[2]){
+		case true:
+			break;
+		case false:
+			break;
+	}
+	wait10Msec(50);
+	switch(taskBool[3]){
+		case true:
+			break;
+		case false:
+			break;
+	}
+	wait10Msec(50);
 }
