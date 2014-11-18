@@ -25,45 +25,45 @@ version .05, 11/15/2014
 
 #include "JoystickDriver.c"
 
-int ipt = 8.25                                        //inches driven per 1 thousand ticks
-int hexagonSide = 40;                                 //hexagon around center goal has side length 40 inches
-int hexagonAngle = 120;                               //hexagon has interior angles of 120 degrees;
+int ipt = 8.25                                  			//inches driven per 1 thousand ticks
+int hexagonSide = 40;                   	    			//hexagon around center goal has side length 40 inches
+int hexagonAngle = 120;                               			//hexagon has interior angles of 120 degrees;
 
-void clear(){                                         //clears all encoders
+void clear(){                                         			//clears all encoders
   nMotorEncoder[L] = 0;
   nMotorEncoder[R] = 0;
   nMotorEncoder[LinearSlide] = 0;
   nMotorEncoder[ArmMotor] = 0;
 } 
-void driveStraight(int in){                           //function which drives straight distance in
-  while(nMotorEncoder[L] < (in/ipt) * 1000            //while the encoders read less than (desired inches*1000 ticks/ipt)
-    && in >= 0){                                      //on the condition that the number of inches desired is greater/equal to zero
-      motor[L] = 80;                                  //run left motor at 80% power
-      motor[R] = 80;                                  //run right motor at 80% power
+void driveStraight(int in){                           			//function which drives straight distance in
+  while(nMotorEncoder[L] < (in/ipt) * 1000            			//while the encoders read less than (desired inches*1000 ticks/ipt)
+    && in >= 0){                                      			//on the condition that the number of inches desired is greater/equal to zero
+      motor[L] = 80;                                  			//run left motor at 80% power
+      motor[R] = 80;                                  			//run right motor at 80% power
     }
-  while(nMotorEncoder[L] > (in/ipt) * 1000            //while the encoders read greater than (desired inches*1000 ticks/ipt)
-    && in < 0){                                       //on the condition that the number of inches desired is less than 0)
-      motor[L] = -80;                                 //run left motor in reverse at 80% power
-      motor[R] = -80;                                 //run right motor in reverse at 80% power
+  while(nMotorEncoder[L] > (in/ipt) * 1000            			//while the encoders read greater than (desired inches*1000 ticks/ipt)
+    && in < 0){                                       			//on the condition that the number of inches desired is less than 0)
+      motor[L] = -80;                                 			//run left motor in reverse at 80% power
+      motor[R] = -80;                                 			//run right motor in reverse at 80% power
     }
-  motor[L] = 0;                                       //Stops left motor
-  motor[R] = 0;                                       //Stops right motor 
-  wait10Msec(100);                                    //waits .1 seconds
-  clear();                                            //clears encoders
+  motor[L] = 0;                                       			//Stops left motor
+  motor[R] = 0;                                       			//Stops right motor 
+  wait10Msec(100);                                    			//waits .1 seconds
+  clear();                                            			//clears encoders
+}	
+void turn(int deg){                                   			//function for turning # of degrees, deg
+  while(nMotorEncoder[R] < (deg*15.87)                			//while the encoder does not read the desired value of (deg/360)*(15pi in/ipt)*1000ticks
+    && deg > 0){                                      			//on the condition that the angle desired is positive
+      motor[R] = 70;                                  			//runs right motor at 70% power
+      motor[L] = -70;                                 			//runs left motor at -70% power
+    }	
+  while(nMotorEncoder[R] > (deg*15.87)                			//while the encoder does not read the desired value of (deg/360)*(15pi in/ipt)*1000ticks
+    && deg < 0){                                      			//on the condition that the angle desired is positive
+      motor[R] = -70;                                 			//runs right motor at -70% power
+      motor[L] = 70;                                  			//runs left motor at 70% power
+    }
 }
-void turn(int deg){                                   //function for turning # of degrees, deg
-  while(nMotorEncoder[R] < (deg*15.87)                //while the encoder does not read the desired value of (deg/360)*(15pi in/ipt)*1000ticks
-    && deg > 0){                                      //on the condition that the angle desired is positive
-      motor[R] = 70;                                  //runs right motor at 70% power
-      motor[L] = -70;                                 //runs left motor at -70% power
-    }
-  while(nMotorEncoder[R] > (deg*15.87)                //while the encoder does not read the desired value of (deg/360)*(15pi in/ipt)*1000ticks
-    && deg < 0){                                      //on the condition that the angle desired is positive
-      motor[R] = -70;                                 //runs right motor at -70% power
-      motor[L] = 70;                                  //runs left motor at 70% power
-    }
-}
-void hexagon(){                                       //drives the robot in a hexagon around the center goal. This will allow the robot to orient itself relative to the center goal
+void hexagon(){                                       			//drives the robot in a hexagon around the center goal. This will allow the robot to orient itself relative to the center goal
   switch(SensorValue[IRSensor]){
     case 5:
       motor[L] = 0;
@@ -80,24 +80,24 @@ void hexagon(){                                       //drives the robot in a he
   }
 }
 task main(){
-  bool taskBool[4];                                   //Determines whether or not a certain task gets enacted
+  bool taskBool[4];                                   		   	//Determines whether or not a certain task gets enacted
 	string taskList[] = 
-	  {"Ramp", "IR", "Regular Tube", "Kickstand"};      //List of different tasks
-	int i = 0;                                          //denotes how many tasks have been decided upon by the user
-	while(i < 3){                                       //while number of tasks decided on is less than total number of tasks
-		nxtDisplayCenteredTextLine(3, "%s", taskList[i]); //Display the name of task being decided on
+	  {"Ramp", "IR", "Regular Tube", "Kickstand"};      	   	//List of different tasks
+	int i = 0;                                          	   	//denotes how many tasks have been decided upon by the user
+	while(i < 3){						   	//while number of tasks decided on is less than total number of tasks
+		nxtDisplayCenteredTextLine(3, "%s", taskList[i]);  	//Display the name of task being decided on
 		wait10Msec(100);
-		if(nNxtButtonPressed == 1){                       //If the left arrow is pressed
-			nxtDisplayCenteredTextLine(5, "Yes");           //Display "true" on NXT
-			taskBool[i] = true;                             //Set the decision to true
+		if(nNxtButtonPressed == 1){                        	//If the left arrow is pressed
+			nxtDisplayCenteredTextLine(5, "Yes");      	//Display "true" on NXT
+			taskBool[i] = true;                        	//Set the decision to true
 		}
 		else{}
-		if(nNxtButtonPressed == 2){                       //If the right arrow is pressed
+		if(nNxtButtonPressed == 2){                       	//If the right arrow is pressed
 			nxtDisplayCenteredTextLine(5, "No");            //Display "false" on the NXT
 			taskBool[i] = false;                            //Set the decision to false
 		}
 		else{}
-		if(nNxtButtonPressed == 3){                       //If the center button is pressed, confirm the decision
+		if(nNxtButtonPressed == 3){                       	//If the center button is pressed, confirm the decision
 			eraseDisplay();                                 //clear the display
 			i = i + 1;                                      //Move on to next decision
 		}
