@@ -25,7 +25,7 @@ version .05, 11/15/2014
 
 #include "JoystickDriver.c"
 
-int ipt = 8.25                                  			//inches driven per 1 thousand ticks
+int ipt = 8.25;                                  			//inches driven per 1 thousand ticks
 int hexagonSide = 40;                   	    			//hexagon around center goal has side length 40 inches
 int hexagonAngle = 120;                               			//hexagon has interior angles of 120 degrees;
 
