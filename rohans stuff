@@ -16,6 +16,9 @@
 //Bobby Shmohan ft. Shish Brown Dynamite, produced by Brown Sugar
 //Rookie team code
 //2014-2015
+/* Didn't want to redon Rohan's code so i just put it on pastebin ~safi
+Teleop http://pastebin.com/QRyCrax3
+Autonomous http://pastebin.com/6qFtjak7 */
 int highspeed = 75;
 int mediumspeed = 30;
 #include "JoystickDriver.c"
