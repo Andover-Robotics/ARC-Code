@@ -16,6 +16,7 @@
 int ipt = 8.25;                                  			//inches driven per 1 thousand ticks
 int hexagonSide = 40;                   	    			//hexagon around center goal has side length 40 inches
 int hexagonAngle = 120;                               			//hexagon has interior angles of 120 degrees;
+int dropPosition;
 
 void clear(){                                         			//clears all encoders
   nMotorEncoder[L] = 0;
@@ -54,9 +55,42 @@ void turn(int deg){                                   			//function for turning 
 task main(){
   clear();
   drive(-72);
+  while(nMotorEncoder[LinearSlide] < 2903){
+    motor[LinearSlide] = 80;
+  }
+  motor[LinearSlide] = 0;
+  clear();
   for(int i = 0; i < 2880; i += 4){
     nMotorEncoderTarget[ArmMotor] = i;
     motor[ArmMotor] = 80;
     servo[ArmJoint] += 1;
   }
+  motor[ArmMotor] = 0;
+  clear();
+  servo[ArmJoint] = dropPosition;
+  while(nMotorEncoder[LinearSlide] > -2903){
+    motor[LinearSlide] = -80;
+  }
+  motor[LinearSlide] = 0;
+  driveStraight(12);
+  turn(-90);
+  driveStraight(30);
+  turn(-90);
+  driveStraight(40);
+  turn(-90);
+  driveStraight(32);
+  driveStraight(40);
+  turn(180);
+  driveStraight(8);
+  turn(-135);
+  driveStraight(11);
+  turn(-90);
+  driveStraight(6);
+  turn(180);
+  driveStraight(6);
+  turn(-90);
+  driveStraight(11);
+  turn(-135);
+  driveStraight(8);
+  turn(180);
 }
