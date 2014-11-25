@@ -41,21 +41,26 @@ void raiseLinearSlide(){
 void armMove(){
 	if(joystick.joy2_y2 < -5 || joystick.joy2_y2 > 5){
 		motor[ArmMotor] = joystick.joy2_y2*0.9;
+		if(joystick.joy2_y2 > 5){
+			servo[ArmJoint]--;
+		}
+		else{
+			servo[ArmJoint]++;
+		}
 	}
 	else{
 		motor[ArmMotor] = 0;
+		servo[ArmJoint] += 0;
 	}
 }
 void joint(){
-	if(joy2Btn(5) == 1 && joy2Btn(6) == 0){
-		servo[ArmJoint] += 1;
-		wait10Msec(2);
+	if(joy2Btn(7) == 1 && joy2Btn(8) == 0){
+		servo[ArmJoint]++;
 	}
-	if(joy2Btn(6) == 1 && joy2Btn(5) == 0){
-		servo[ArmJoint] += -1;
-		wait10Msec(2);
+	if(joy2Btn(8) == 1 && joy2Btn(7) == 0){
+		servo[ArmJoint]--;
 	}
-	if(joy2Btn(5) == 0 && joy2Btn(6) == 0){
+	if(joy2Btn(7) == 0 && joy2Btn(8) == 0){
 		servo[ArmJoint] += 0;
 	}
 }
