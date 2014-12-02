@@ -1,0 +1,73 @@
+#pragma config(Hubs,  S1, HTMotor,  HTMotor,  HTServo,  none)
+#pragma config(Sensor, S1,     ,               sensorI2CMuxController)
+#pragma config(Motor,  mtr_S1_C1_1,     R,             tmotorTetrix, openLoop, encoder)
+#pragma config(Motor,  mtr_S1_C1_2,     L,             tmotorTetrix, openLoop, reversed, encoder)
+#pragma config(Motor,  mtr_S1_C2_1,     Lift,          tmotorTetrix, openLoop, reversed, encoder)
+#pragma config(Motor,  mtr_S1_C2_2,     Spin,          tmotorTetrix, openLoop, encoder)
+#pragma config(Servo,  srvo_S1_C3_1,    oneServo,             tServoStandard)
+#pragma config(Servo,  srvo_S1_C3_2,    servo2,               tServoNone)
+#pragma config(Servo,  srvo_S1_C3_3,    servo3,               tServoNone)
+#pragma config(Servo,  srvo_S1_C3_4,    servo4,               tServoNone)
+#pragma config(Servo,  srvo_S1_C3_5,    servo5,               tServoNone)
+#pragma config(Servo,  srvo_S1_C3_6,    servo6,               tServoNone)
+
+//
+// RANGE OF JOYSICK (X & Y) = -128 <= x < 128
+// RANGE OF MOTOR SPEED 0 <= x <= 100
+//minor changes and documentation
+
+#include "JoystickDriver.c"
+//int highspeed = 
+#define HISPDLIFT 30
+void driveLeft(){
+	if(joystick.joy1_y1 < -5 || joystick.joy1_y1 > 5){
+		motor[L] = joystick.joy1_y1*0.4;
+	}
+	else{
+		motor[L] = 0;
+	}
+}
+void driveRight(){
+	if(joystick.joy1_y2 < -5 || joystick.joy1_y2 > 5){
+		motor[R] = joystick.joy1_y2*0.4;
+	}
+	else{
+		motor[R] = 0;
+	}
+}
+void liftRaise(){
+	if(joystick.joy2_y1 < -5 || joystick.joy2_y1 > 5){
+		motor[Lift] = joystick.joy2_y1 * 0.4;
+	}
+	else{
+		motor[Lift] = 0;
+	}
+}
+void threesixtynoscope(){
+	if(joystick.joy2_y2 < -5 || joystick.joy2_y2 > 5){
+		motor[Spin] = joystick.joy2_y2 * 0.3;
+	}
+	else{
+		motor[Spin] = 0;
+	}
+}
+/*void servoMove(){
+	if(joy2Btn(7) == 1 && joy2Btn(8) == 0){
+		servo[oneServo] += 1;
+	}
+	if(joy2Btn(8) == 1 && joy2Btn(7) == 0){
+		servo[oneServo] += -1;
+	}
+}*/
+task main()
+{
+	waitForStart();
+	while(true){
+		getJoystickSettings(joystick);
+		driveLeft();
+		driveRight();
+		threesixtynoscope();
+		servoMove();
+		liftRaise();
+	}
+}
