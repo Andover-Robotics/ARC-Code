@@ -1,0 +1,82 @@
+#pragma config(Hubs,  S1, HTMotor,  HTMotor,  none,     none)
+#pragma config(Sensor, S1,     ,               sensorI2CMuxController)
+#pragma config(Motor,  mtr_S1_C1_1,     R,             tmotorTetrix, openLoop, encoder)
+#pragma config(Motor,  mtr_S1_C1_2,     L,             tmotorTetrix, openLoop, reversed, encoder)
+#pragma config(Motor,  mtr_S1_C2_1,     Lift,          tmotorTetrix, openLoop, reversed, encoder)
+#pragma config(Motor,  mtr_S1_C2_2,     Spin,          tmotorTetrix, openLoop, encoder)
+
+int slidevalue = 13; //The current speed of the ballbelt
+#include "JoystickDriver.c"
+//#define HISPDLIFT 30
+
+float f;	
+float f1;
+		
+/*
+Used for going left
+*/
+void driveLeft(){
+
+	if(joystick.joy1_y1 < -5 || joystick.joy1_y1 > 5){
+		f = (((float)pow(joystick.joy1_y1, 3))/((float)pow(128, 3)));
+		motor[L] = ( f * 75); //Makes control logarithmic; initially starting the motor requires a higher joystick value
+	}
+	else{
+		motor[L] = 0;
+	}
+}
+/*
+Used for going right
+*/
+void driveRight(){
+	if(joystick.joy1_y2 < -5 || joystick.joy1_y2 > 5){
+		f1 = ((float)pow(joystick.joy1_y2, 3))/((float)pow(128, 3));
+		motor[R] = (int)( f1 * 75 ); //Makes control logarithmic
+	}
+	else{
+		motor[R] = 0;
+	}
+}
+/*
+Used for manually lifting the linear slide if neccisary
+*/
+void liftRaise(){
+	
+	if(joystick.joy2_y1 < -5 || joystick.joy2_y1 > 5){
+		motor[Lift] = joystick.joy2_y1 * 0.3; //Linear slide has linear control
+	}
+	else{
+		motor[Lift] = 0;
+	}
+
+}
+/*
+Used to control the ball belt
+*/
+void threesixtynoscope(){
+
+	if(joy2Btn(1) == 1) { //The ball belt spins when button 1 is pressed
+		motor[Spin] = slidevalue; //The current speed of the ballbelt
+	}
+	else {
+		motor[Spin] = 0;
+	}
+	if(joy2Btn(2) == 1 && slidevalue > 1) { //The ball belt slows when button 2 is pressed
+		slidevalue--;
+	}
+	if(joy2Btn(4) == 1 && slidevalue < 18) { //The ball belt quickens when button 4 is pressed
+		slidevalue++;
+	}
+}
+
+task main()
+{
+	waitForStart();
+	while(true){
+		getJoystickSettings(joystick);
+		driveLeft();
+		driveRight();
+		threesixtynoscope();
+		liftRaise();
+	}
+}
