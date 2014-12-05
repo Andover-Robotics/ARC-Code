@@ -3,8 +3,8 @@
 #pragma config(Motor,  mtr_S1_C1_1,     L,             tmotorTetrix, openLoop, reversed, encoder)
 #pragma config(Motor,  mtr_S1_C1_2,     R,             tmotorTetrix, openLoop, encoder)
 #pragma config(Motor,  mtr_S1_C3_1,     LinearSlide,   tmotorTetrix, openLoop, reversed, encoder)
-#pragma config(Motor,  mtr_S1_C3_2,     ArmMotor,      tmotorTetrix, openLoop, reversed)
-#pragma config(Servo,  srvo_S1_C2_1,    servo1,               tServoNone)
+#pragma config(Motor,  mtr_S1_C3_2,     ArmMotor,      tmotorTetrix, openLoop, reversed, encoder)
+#pragma config(Servo,  srvo_S1_C2_1,    Hook,                 tServoStandard)
 #pragma config(Servo,  srvo_S1_C2_2,    ArmJoint,             tServoStandard)
 #pragma config(Servo,  srvo_S1_C2_3,    servo3,               tServoNone)
 #pragma config(Servo,  srvo_S1_C2_4,    servo4,               tServoNone)
@@ -41,33 +41,42 @@ void raiseLinearSlide(){
 void armMove(){
 	if(joystick.joy2_y2 < -5 || joystick.joy2_y2 > 5){
 		motor[ArmMotor] = joystick.joy2_y2*0.9;
-		if(joystick.joy2_y2 > 5){
-			servo[ArmJoint]--;
-		}
-		else{
-			servo[ArmJoint]++;
-		}
 	}
 	else{
 		motor[ArmMotor] = 0;
-		servo[ArmJoint] += 0;
 	}
 }
 void joint(){
 	if(joy2Btn(7) == 1 && joy2Btn(8) == 0){
-		servo[ArmJoint]++;
+		servo[ArmJoint] += 1;
+		wait10Msec(2);
 	}
 	if(joy2Btn(8) == 1 && joy2Btn(7) == 0){
-		servo[ArmJoint]--;
+		servo[ArmJoint] += -1;
+		wait10Msec(2);
 	}
 	if(joy2Btn(7) == 0 && joy2Btn(8) == 0){
 		servo[ArmJoint] += 0;
+	}
+}
+void leeuWenHook(){
+	if(joy2Btn(5) == 1 && joy2Btn(6) == 0){
+		servo[Hook] += 1;
+		wait10Msec(2);
+	}
+	if(joy2Btn(5) == 0 && joy2Btn(6) == 1){
+		servo[Hook] += -1;
+		wait10Msec(2);
+	}
+	if(joy2Btn(5) == 0 && joy2Btn(6) == 0){
+		servo[Hook] += 0;
 	}
 }
 task main()
 {
 	waitForStart();
 	servoChangeRate[ArmJoint] = 2;
+	servoChangeRate[Hook] = 3;
 	while(true){
 		getJoystickSettings(joystick);
 		driveLeft();
@@ -75,6 +84,7 @@ task main()
 		raiseLinearSlide();
 		armMove();
 		joint();
-
+		leeuWenHook();
 	}
 }
+
