@@ -26,10 +26,11 @@ version .2, 12/5/2014
 #include "JoystickDriver.c"
 
 float ipt = 8.25;																						//inches driven per 1 thousand ticks
-int octagonSide = 40;                   	   								//hexagon around center goal has side length 40 inches
+int octagonSide = 20;                   	   								//hexagon around center goal has side length 40 inches
 int octagonAngle = 135;                               			//hexagon has interior angles of 120 degrees
 int linearTicks = 2903;																			//number of ticks to raise linear slide
 int armTicks = 12;																					//number of ticks to raise arm 1 degree
+bool IRDetection = false;																		//denotes whether or not IR has been detected
 
 void clear(){                                         			//clears all encoders
   nMotorEncoder[L] = 0;
@@ -91,9 +92,9 @@ void raiseArm(int deg){
 	motor[ArmMotor] = 0;
 }
 dumpBottle(){
-	servo[ArmJoint] += -180;
-	wait10Msec(200);
 	servo[ArmJoint] += 180;
+	wait10Msec(200);
+	servo[ArmJoint] += -180;
 	wait10Msec(200);
 }
 /*void gui(){
@@ -121,13 +122,52 @@ dumpBottle(){
 		else{}
 	}
 }*/
-task main(){
+void tRaiseArm(){
+	for(int i = 0; i < 7; i++){
+		motor[ArmMotor] = 80;
+		servo[ArmJoint] += -25;
+		wait10Msec(100);
+	}
+}
+void tLowerArm(){
+	for(int i = 0; i < 28; i++){
+		motor[ArmMotor] = -80;
+		servo[ArmJoint] += 25;
+		wait1Msec(250);
+	}
+}
+void initiallize(){
+	ServoChangeRate[ArmJoint] = 2;
+	ServoChangeRate[Hook] = 2;
 	clear();
-  waitForStart();
+	waitForStart();
+}
+void IRDrive(int in){																					//drives robot a set distance or until IR is detected, does not drive when IR already found
+	while(nMotorEncoder[L] < (in/ipt)*1000											//while the encoder is less than 1000 * desired inches/inches per thousand tick
+		&& IRDetection == false																		//and also the IR beacon has not been found
+		&& SensorValue[IRS] != 5){																//and also the sensor value is not equal to 5 (straight ahead)
+			motor[L] = 80;																					//Left motor drive forward
+			motor[R] = 80;																					//Right motor drive forward
+		}
+	motor[L] = 0;																								//stop Left motor
+	motor[R] = 0;																								//stop Right motor
+	if(SensorValue[IRS] == 5){																	//if the IR beacon is straight ahead
+		IRDetection = true;																				//set the IR beacon to found
+	}
+	if(SensorValue[IRS] != 5){
+		turn(octagonAngle);
+	}
+}
+task main(){
+	initiallize();
   raiseLinearSlide(.1);
-  driveStraight(-72);
+  driveStraight(-72.14);
   raiseLinearSlide(.9);
-  raiseArm(180);
+  tRaiseArm();
   dumpBottle();
-  
+  tLowerArm();
+  turn(-90);
+  IRDrive(60);
+  IRDrive(7.5);
+  IRDrive(7.5);
 }
