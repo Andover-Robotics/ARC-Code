@@ -6,7 +6,7 @@
 #pragma config(Motor,  mtr_S1_C3_2,     ArmMotor,      tmotorTetrix, openLoop, reversed, encoder)
 #pragma config(Servo,  srvo_S1_C2_1,    Hook,                 tServoStandard)
 #pragma config(Servo,  srvo_S1_C2_2,    ArmJoint,             tServoStandard)
-#pragma config(Servo,  srvo_S1_C2_3,    servo3,               tServoNone)
+#pragma config(Servo,  srvo_S1_C2_3,    autoArm,              tServoStandard)
 #pragma config(Servo,  srvo_S1_C2_4,    servo4,               tServoNone)
 #pragma config(Servo,  srvo_S1_C2_5,    servo5,               tServoNone)
 #pragma config(Servo,  srvo_S1_C2_6,    servo6,               tServoNone)
@@ -72,6 +72,19 @@ void leeuWenHook(){
 		servo[Hook] += 0;
 	}
 }
+void higherArm() {
+		if(joy1Btn(7) == 1 && joy2Btn(8) == 0){
+		servo[autoArm] += 1;
+		wait10Msec(2);
+	}
+	if(joy2Btn(7) == 0 && joy2Btn(8) == 1){
+		servo[autoArm] += -1;
+		wait10Msec(2);
+	}
+	if(joy2Btn(7) == 0 && joy2Btn(8) == 0){
+		servo[autoArm] += 0;
+	}
+}
 task main()
 {
 	waitForStart();
@@ -85,6 +98,7 @@ task main()
 		armMove();
 		joint();
 		leeuWenHook();
+		higherArm();
 	}
 }
 
