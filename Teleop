@@ -60,20 +60,20 @@ void joint(){
 	}
 }
 void leeuWenHook(){
-	if(joy2Btn(5) == 1 && joy2Btn(6) == 0){
+	if(joy1Btn(5) == 1 && joy1Btn(6) == 0){
 		servo[Hook] += 1;
 		wait10Msec(2);
 	}
-	if(joy2Btn(5) == 0 && joy2Btn(6) == 1){
+	if(joy1Btn(5) == 0 && joy1Btn(6) == 1){
 		servo[Hook] += -1;
 		wait10Msec(2);
 	}
-	if(joy2Btn(5) == 0 && joy2Btn(6) == 0){
+	if(joy1Btn(5) == 0 && joy1Btn(6) == 0){
 		servo[Hook] += 0;
 	}
 }
 void higherArm() {
-		if(joy1Btn(7) == 1 && joy2Btn(8) == 0){
+	if(joy2Btn(7) == 1 && joy2Btn(8) == 0){
 		servo[autoArm] += 1;
 		wait10Msec(2);
 	}
@@ -89,7 +89,7 @@ task main()
 {
 	waitForStart();
 	servoChangeRate[ArmJoint] = 2;
-	servoChangeRate[Hook] = 3;
+	servoChangeRate[Hook] = 10;
 	while(true){
 		getJoystickSettings(joystick);
 		driveLeft();
