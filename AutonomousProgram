@@ -26,7 +26,7 @@ version .2, 12/5/2014
 #include "JoystickDriver.c"
 
 float ipt = 8.25;																						//inches driven per 1 thousand ticks
-int octagonSide = 20;                   	   			//octagon around center goal has side length 20 inches
+int octagonSide = 20;                   	   								//octagon around center goal has side length 20 inches
 int octagonAngle = 135;                               			//hexagon has interior angles of 120 degrees
 int linearTicks = 2903;																			//number of ticks to raise linear slide
 int armTicks = 12;																					//number of ticks to raise arm 1 degree
