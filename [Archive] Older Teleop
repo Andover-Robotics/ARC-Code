@@ -4,6 +4,8 @@
 #pragma config(Motor,  mtr_S1_C1_2,     L,             tmotorTetrix, openLoop, reversed, encoder)
 #pragma config(Motor,  mtr_S1_C2_1,     Lift,          tmotorTetrix, openLoop, reversed, encoder)
 #pragma config(Motor,  mtr_S1_C2_2,     Spin,          tmotorTetrix, openLoop, encoder)
+#pragma config(Motor,  mtr_S1_C3_1,     bringeringer,  tmotorTetrix, openLoop)
+#pragma config(Motor,  mtr_S1_C3_2,     motorI,        tmotorTetrix, openLoop)
 #pragma config(Servo,  srvo_S1_C3_1,    oneServo,             tServoStandard)
 #pragma config(Servo,  srvo_S1_C3_2,    servo2,               tServoNone)
 #pragma config(Servo,  srvo_S1_C3_3,    servo3,               tServoNone)
@@ -43,6 +45,17 @@ void liftRaise(){
 		motor[Lift] = 0;
 	}
 }
+void bringer()
+{
+		if(joy2Btn(7) == 1 && joy2Btn(8) == 0)  
+	{
+		motor[bringeringer] = 100;
+	}
+		if(joy2Btn(8) == 1 && joy2Btn(7) == 0)  
+	{
+		motor[bringeringer] = -100;
+	}
+}
 void threesixtynoscope(){
 	if(joystick.joy2_y2 < -5 || joystick.joy2_y2 > 5){
 		motor[Spin] = joystick.joy2_y2 * 0.3;
@@ -69,5 +82,6 @@ task main()
 		threesixtynoscope();
 		servoMove();
 		liftRaise();
+		bringer();
 	}
 }
