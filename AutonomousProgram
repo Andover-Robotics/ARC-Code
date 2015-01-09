@@ -26,7 +26,7 @@ version .2, 12/5/2014
 #include "JoystickDriver.c"
 
 float ipt = 8.25;																						//inches driven per 1 thousand ticks
-int octagonSide = 20;                   	   								//octagon around center goal has side length 20 inches
+int octagonSide = 20;                   	   	         	    //octagon around center goal has side length 20 inches
 int octagonAngle = 135;                               			//hexagon has interior angles of 120 degrees
 int linearTicks = 2903;																			//number of ticks to raise linear slide
 int armTicks = 12;																					//number of ticks to raise arm 1 degree
@@ -59,11 +59,13 @@ void turn(int deg){                                   			//function for turning 
       motor[R] = 70;                                  			//runs right motor at 70% power
       motor[L] = -70;                                 			//runs left motor at -70% power
     }	
-  while(nMotorEncoder[R] > (deg*15.87)                			//while the encoder does not read the desired value of (deg/360)*(15pi in/ipt)*1000ticks
+  while(nMotorEncoder[L] < -(deg*15.87)                			//while the encoder does not read the desired value of (deg/360)*(15pi in/ipt)*1000ticks
     && deg < 0){                                      			//on the condition that the angle desired is positive
       motor[R] = -70;                                 			//runs right motor at -70% power
       motor[L] = 70;                                  			//runs left motor at 70% power
     }
+ motor[R]=0;
+ motor[L]=0;
 }
 void raiseLinearSlide(float per){
 	while(nMotorEncoder[LinearSlide] < per * linearTicks
@@ -163,4 +165,12 @@ void IRDrive(int in){																					//drives robot a set distance or until
 task main(){
 	initiallize();
   tRaiseArm();
+  driveStraight(68);
+  raiseLinearSlide(1);
+  servo[ArmJoint]=255;
+  tLowerArm();
+  raiseLinearSlide(-0.9);
+  //Julian start copying here
+  turn(180);
+  driveStraight(-4);
 }
