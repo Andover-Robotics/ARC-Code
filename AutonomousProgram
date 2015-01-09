@@ -173,4 +173,5 @@ task main(){
   //Julian start copying here
   turn(180);
   driveStraight(-4);
+  servo[hook]=255;
 }
