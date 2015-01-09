@@ -66,6 +66,7 @@ void turn(int deg){                                   			//function for turning 
     }
  motor[R]=0;
  motor[L]=0;
+ clear();
 }
 void raiseLinearSlide(float per){
 	while(nMotorEncoder[LinearSlide] < per * linearTicks
@@ -171,7 +172,9 @@ task main(){
   tLowerArm();
   raiseLinearSlide(-0.9);
   //Julian start copying here
-  turn(180);
-  driveStraight(-4);
-  servo[hook]=255;
+  driveStraight(-12);
+  turn(90);
+  driveStraight(36);
+  turn(90);
+  
 }
