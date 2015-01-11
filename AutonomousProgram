@@ -19,7 +19,7 @@ Cascade Effect
 Team 4410 ARC Lightning
 Autonomous Code
 Christopher Zhao
-version .4, 1/10/2015
+version .5, 1/11/2015
 */
 
 #include "JoystickDriver.c"
@@ -166,7 +166,7 @@ void initiallize(){
 	servo[ArmJoint] = 240;
 	servo[Hook] = 0;
 	clear();
-	//waitForStart();
+	waitForStart();
 }
 void IRDrive(int in){																					//drives robot a set distance or until IR is detected, does not drive when IR already found
 	while(nMotorEncoder[L] < (in/ipt)*1000
@@ -195,9 +195,9 @@ task main(){
   turn(90);
   driveStraight(24);
   turn(-90);
-  IRDrive(10);
+  IRDrive(7);
   if(IRDetection == false){
-  	driveStraight(3);
+  	driveStraight(6);
   	turn(45);
   	IRDrive(4);
   	wait10Msec(50);
@@ -212,5 +212,7 @@ task main(){
 		driveStraight(-13.5);
 		turn(-90);
 		driveFullPwr(-51);
+		turn(90);
+		driveFullPwr(-20);
 	}
 }
