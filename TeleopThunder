@@ -120,10 +120,10 @@ int couplePos = 0;
 
     void sweeper() { //controls vertical sweeper
     	if(joy1Btn(7) == 1){
-    		motor[sweep] = 15;
+    		motor[sweep] = 40;
     	}
     	else if(joy1Btn(8) == 1) {
-    		motor[sweep] = -15;
+    		motor[sweep] = -40;
     	}
     	else{
     		motor[sweep] = 0;
