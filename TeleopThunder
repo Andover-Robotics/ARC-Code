@@ -152,6 +152,7 @@ int couplePos = 0;
                     driveLeft();
                     //debug();
                     driveRight();
+                    decouple();
                     beltball();
                     liftRaise();
                     sweeper();
