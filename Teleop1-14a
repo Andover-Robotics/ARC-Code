@@ -90,17 +90,14 @@ int couplePos = 0;
     Used to control the ball belt
     */
     void beltball() {
-						bool inverse = false;
-						if (joy2Btn(LJ) == 1) {
-										inverse = !inverse; //Switchn inverse, i.e. if false, set to true, and vice versa
-						}
-
+	
             if(joy2Btn(1) == 1)  //The ball belt spins when button 1 is pressed
             {
-            				if (inverse)
-            					motor[belt] = -slidevalue;
-            				else
-            					motor[belt] = slidevalue; //The current speed of the ballbelt
+            	motor[belt] = slidevalue; //The current speed of the ballbelt
+            }
+            if(joy2Btn(RT == 1) //Runs in reverse when right trigger is pressed
+            {
+            	motor[belt] = -slidevalue;
             }
             if(joy2Btn(3) == 1)  //It stops when button 3 is pressed
             {
