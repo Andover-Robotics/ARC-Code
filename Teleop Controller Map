@@ -10,6 +10,11 @@ ROBOT_HARDWARE_MAP =
           | mRightDrive [port = M2C1] -> Motor which controls Right Drive (the right side of robot's drive)
 
 CONTROL_MAP =
+     
+     Controller 1
+          | R Trigger -> Spin [mSweeper] counter clockwise
+          | L Trigger -> Spin [mSweeper] clockwise
+     
      Controller 2
           | DOWN_RIGHT_JOYSTICK -> Counter Clockwise Spin of [mLift]
           | UP_RIGHT_STICK -> Clockwise spin of [mLift]
@@ -17,7 +22,6 @@ CONTROL_MAP =
           | Y -> Increase Speed of [mBallBelt]
           | A -> Decrease Speed of [mBallBelt]
           | B -> Stop spinning [mBallBelt]
-          | R Trigger -> Spin [mSweeper] counter clockwise
-          | L Trigger -> Spin [mSweeper] clockwise
           | R Bumper -> Turn [sCouplingRelease] clockwise (pos += 2)
           | L Bumper -> Turn [sCouplingRelease] counter clockwise (pos -= 2)
+          | R Trigger -> Spin ball belt in reverse
