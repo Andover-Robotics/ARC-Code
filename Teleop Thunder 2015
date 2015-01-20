@@ -19,6 +19,7 @@ int slidevalue = 40; //The current speed of the ballbelt
 float f;
 float f1;
 int couplePos = 0;
+int beltOn = 0;
 
 //#define HISPDLIFT 30
 #define X 0
@@ -32,6 +33,9 @@ int couplePos = 0;
 #define BACK 8
 #define START 9
 #define LJ 10
+#define OFF 0
+#define ON 1
+#define BACK -1
 
 /*
     void debug() //plays a tone when button is pressed
@@ -92,15 +96,15 @@ int couplePos = 0;
 	
             if(joy2Btn(1) == 1)  //The ball belt spins when button 1 is pressed
             {
-            	motor[belt] = slidevalue; //The current speed of the ballbelt
+            	beltOn = ON;
             }
-            if(joy2Btn(RT == 1) //Runs in reverse when right trigger is pressed
+            if(joy2Btn(7) == 1) //Runs in reverse when right trigger is pressed
             {
-            	motor[belt] = -slidevalue;
+            	beltOn = BACK;
             }
             if(joy2Btn(3) == 1)  //It stops when button 3 is pressed
             {
-                    motor[belt] = 0;
+                beltOn = OFF;
             }
             if(joy2Btn(2) == 1 && slidevalue > 1)  //The ball belt slows when button 2 is pressed
             {
@@ -109,8 +113,17 @@ int couplePos = 0;
             }
             if(joy2Btn(4) == 1 && slidevalue < 18) //The ball belt quickens when button 4 is pressed
             {
-            				PlayImmediateTone(440 + slidevalue,10);
-                    slidevalue++;
+            	PlayImmediateTone(440 + slidevalue,10);
+                slidevalue++;
+            }
+            if(beltOn == OFF){
+            	motor[belt] = 0;
+            }
+            if(beltOn == ON){
+            	motor[belt] = slidevalue; //The current speed of the ballbelt
+            }
+            if(beltOn == BACK){
+            	motor[belt] = -slidevalue;
             }
     }
 
@@ -124,18 +137,18 @@ int couplePos = 0;
     	else{
     		motor[sweep] = 0;
     	}
-   	}
+   }
 
    	void decouple() { //controls goal release servo
    		if(joy2Btn(5) == 1){
    			PlayImmediateTone(440 + couplePos,10);
-   			servo[release] += 2;
-   			couplePos += 2;
+   			servo[release] ++;
+   			couplePos ++;
    		}
    		if(joy2Btn(6) == 1){
    			PlayImmediateTone(440 + couplePos,10);
-   			servo[release] -=2;
-   			couplePos -= 2;
+   			servo[release] --;
+   			couplePos --;
    		}
    	}
 
