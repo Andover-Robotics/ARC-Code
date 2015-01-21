@@ -22,17 +22,18 @@ int couplePos = 0;
 int beltOn = 0;
 
 //#define HISPDLIFT 30
-#define X 0
-#define Y 3
-#define A 1
-#define B 2
-#define LB 4
-#define LT 6
-#define RB 5
-#define RT 7
-#define BACK 8
-#define START 9
-#define LJ 10
+//#define X 0
+//#define Y 3
+//#define A 1
+//#define B 2
+//#define LB 4
+//#define LT 6
+//#define RB 5
+//#define RT 7
+//#define BACK 8
+//#define START 9
+//#define LJ 10
+
 #define OFF 0
 #define ON 1
 #define BACK -1
@@ -93,77 +94,76 @@ int beltOn = 0;
     Used to control the ball belt
     */
     void beltball() {
-	
-            if(joy2Btn(1) == 1)  //The ball belt spins when button 1 is pressed
-            {
-            	beltOn = ON;
-            }
-            if(joy2Btn(7) == 1) //Runs in reverse when right trigger is pressed
-            {
-            	beltOn = BACK;
-            }
-            if(joy2Btn(3) == 1)  //It stops when button 3 is pressed
-            {
-                beltOn = OFF;
-            }
-            if(joy2Btn(2) == 1 && slidevalue > 1)  //The ball belt slows when button 2 is pressed
-            {
-                    PlayImmediateTone(440 + slidevalue,10);
-            				slidevalue--;
-            }
-            if(joy2Btn(4) == 1 && slidevalue < 18) //The ball belt quickens when button 4 is pressed
-            {
-            	PlayImmediateTone(440 + slidevalue,10);
-                slidevalue++;
-            }
-            if(beltOn == OFF){
-            	motor[belt] = 0;
-            }
-            if(beltOn == ON){
-            	motor[belt] = slidevalue; //The current speed of the ballbelt
-            }
-            if(beltOn == BACK){
-            	motor[belt] = -slidevalue;
-            }
+
+      	if(joy2Btn(1) == 1)  //The ball belt spins when button 1 is pressed
+				{
+      			beltOn = ON;
+      	}
+      	if(joy2Btn(7) == 1) //Runs in reverse when right trigger is pressed
+      	{
+      			beltOn = BACK;
+      	}
+      	if(joy2Btn(3) == 1)  //It stops when button 3 is pressed
+      	{
+      			beltOn = OFF;
+      	}
+      	if(joy2Btn(2) == 1 && slidevalue > 1)  //The ball belt slows when button 2 is pressed
+      	{
+      			PlayImmediateTone(440 + slidevalue,10);
+      			slidevalue--;
+      	}
+      	if(joy2Btn(4) == 1 && slidevalue < 18) //The ball belt quickens when button 4 is pressed
+      	{
+      			PlayImmediateTone(440 + slidevalue,10);
+      			slidevalue++;
+      	}
+				if(beltOn == OFF){
+      			motor[belt] = 0;
+      	}
+				if(beltOn == ON){
+      			motor[belt] = slidevalue; //The current speed of the ballbelt
+      	}
+				if(beltOn == BACK){
+      			motor[belt] = -slidevalue;
+      	}
     }
 
     void sweeper() { //controls vertical sweeper
-    	if(joy1Btn(7) == 1){
-    		motor[sweep] = 40;
-    	}
-    	else if(joy1Btn(8) == 1) {
-    		motor[sweep] = -40;
-    	}
-    	else{
-    		motor[sweep] = 0;
-    	}
-   }
+    		if(joy1Btn(7) == 1){
+    				motor[sweep] = 40;
+    		} else if(joy1Btn(8) == 1) {
+    				motor[sweep] = -40;
+    		} else{
+    				motor[sweep] = 0;
+    		}
+   	}
 
    	void decouple() { //controls goal release servo
-   		if(joy2Btn(5) == 1){
-   			PlayImmediateTone(440 + couplePos,10);
-   			servo[release] ++;
-   			couplePos ++;
-   		}
-   		if(joy2Btn(6) == 1){
-   			PlayImmediateTone(440 + couplePos,10);
-   			servo[release] --;
-   			couplePos --;
-   		}
+   			if(joy2Btn(5) == 1){
+   					PlayImmediateTone(440 + couplePos,10);
+   					servo[release] += 1;
+   					couplePos += 1;
+   			}
+
+   			if(joy2Btn(6) == 1){
+   					PlayImmediateTone(440 + couplePos,10);
+   					servo[release] -= 1;
+   					couplePos -= 1;
+   			}
    	}
 
    	task main()
     {
-            waitForStart();
-            PlayImmediateTone(600,100);
-            while(true){
-                    getJoystickSettings(joystick);
-                    driveLeft();
-                    //debug();
-                    driveRight();
-                    decouple();
-                    beltball();
-                    liftRaise();
-                    sweeper();
-            }
+         waitForStart();
+         PlayImmediateTone(600,100);
+         while(true) {
+         	  getJoystickSettings(joystick);
+            driveLeft();
+            //debug();
+            driveRight();
+            decouple();
+            beltball();
+            liftRaise();
+            sweeper();
+         }
     }
