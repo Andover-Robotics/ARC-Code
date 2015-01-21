@@ -15,7 +15,7 @@
 
 #include "JoystickDriver.c"
 
-int slidevalue = 40; //The current speed of the ballbelt
+int slidevalue = 18; //The current speed of the ballbelt
 float f;
 float f1;
 int couplePos = 0;
@@ -109,21 +109,23 @@ int beltOn = 0;
       	}
       	if(joy2Btn(2) == 1 && slidevalue > 1)  //The ball belt slows when button 2 is pressed
       	{
-      			PlayImmediateTone(440 + slidevalue,10);
+      			PlayImmediateTone(440 + 5 * slidevalue,10);
       			slidevalue--;
+      			wait1Msec(200);
       	}
       	if(joy2Btn(4) == 1 && slidevalue < 18) //The ball belt quickens when button 4 is pressed
       	{
-      			PlayImmediateTone(440 + slidevalue,10);
+      			PlayImmediateTone(440 + 5 * slidevalue,10);
       			slidevalue++;
+      			wait1Msec(200);
       	}
-				if(beltOn == OFF){
+	if(beltOn == OFF){
       			motor[belt] = 0;
       	}
-				if(beltOn == ON){
+	if(beltOn == ON){
       			motor[belt] = slidevalue; //The current speed of the ballbelt
       	}
-				if(beltOn == BACK){
+	if(beltOn == BACK){
       			motor[belt] = -slidevalue;
       	}
     }
