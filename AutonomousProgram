@@ -176,7 +176,7 @@ void initiallize(){
 }
 void IRDrive(int in){																					//drives robot a set distance or until IR is detected, does not drive when IR already found
 	while(nMotorEncoder[L] < (in/ipt)*1000
-			&& SensorValue[IRSensor] != 5 ){													//while the encoder is less than 1000 * desired inches/inches per thousand
+			&& SensorValue[IRSensor] != 5 ){												//while the encoder is less than 1000 * desired inches/inches per thousand
 			motor[L] = 80;																					//Left motor drive forward
 			motor[R] = 80;																					//Right motor drive forward
 		}
@@ -190,16 +190,33 @@ void IRDrive(int in){																					//drives robot a set distance or until
 task main(){
 	initiallize();
   raiseArm();
-  driveStraight(77.5);
+  driveStraight(/*77.5*/);		//remeasure
   raiseLinearSlide(1);
   servo[ArmJoint] = 0;
   wait10Msec(300);
   servo[ArmJoint] = 180;
   lowerArm();
   raiseLinearSlide(-0.9);
-	driveStraight(-7.5);
+	driveStraight(/*-7.5*/);		//remeasure
   turn(90);
-  driveStraight(24);
+  driveStraight(/*24*/);			//remeasure
   turn(-90);
-  driveStraight(-
+  driveStraight(-24);
+  turn(-90);
+  driveStraight(-10);
+  IRDrive(-3);
+  if(IRDetection == false){
+  	turn(-45);
+  	IRDrive(-5);
+  }
+  if(IRDetection == false){
+ 		turn(-45);
+ 		IRDrive(-5);
+ 	}	
+ 	if(IRDetection == true){
+ 		turn(-90);
+ 		raiseArmFull();
+ 		driveStraight(10);
+ 		
+ 	}
 }
