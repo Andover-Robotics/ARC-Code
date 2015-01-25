@@ -19,18 +19,24 @@ Cascade Effect
 Team 4410 ARC Lightning
 Autonomous Code
 Christopher Zhao
-version .9, 1/22/2015
+version 1.0, 1/25/2015
 */
 
-#include "JoystickDriver.c"
+#include "JoystickDriver.c"																	//waitForStart() defined here
 
-float ipt = 12;//8.7266463;																	//inches driven per 1 thousand ticks
+float ipt = 12;//8.7266463;																	//inches driven per 1 thousand ticks																								Test this value, should be more accurate
 //int octagonSide = 20;                   	   							//hexagon around center goal has side length 40 inches
 //int octagonAngle = 135;                               		//hexagon has interior angles of 120 degrees
 int linearTicks = 2903;																			//number of ticks to raise linear slide
 int armTicks = 12;																					//number of ticks to raise arm 1 degree
 bool IRDetection = false;																		//denotes whether or not IR has been detected
 
+void stop(){
+	motor[L] = 0;
+	motor[R] = 0;
+	motor[LinearSlide] = 0;
+	motor[ArmMotor] = 0;
+}
 void clear(){                                         			//clears all encoders
   nMotorEncoder[L] = 0;
   nMotorEncoder[R] = 0;
@@ -171,6 +177,7 @@ void initiallize(){
 	servoChangeRate[Hook] = 9;
 	servo[ArmJoint] = 240;
 	servo[Hook] = 0;
+	servo[autoArm] = 254;
 	clear();
 	waitForStart();
 }
@@ -217,6 +224,11 @@ task main(){
  		turn(-90);
  		raiseArmFull();
  		driveStraight(10);
- 		
+ 		servo[autoArm] = 0;
+ 		driveStraight(-10);
+ 		turn(-90);
+ 		driveStraight(10.5);
+ 		turn(-90);
+ 		driveStraight(-25);
  	}
 }
