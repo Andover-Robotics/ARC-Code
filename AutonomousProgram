@@ -202,15 +202,14 @@ task main(){
   servo[ArmJoint] = 0;
   wait10Msec(300);
   servo[ArmJoint] = 180;
-  lowerArm();
   raiseLinearSlide(-0.9);
-	driveStraight(/*-7.5*/);		//remeasure
+	driveStraight(-12);					//remeasure
   turn(90);
-  driveStraight(/*24*/);			//remeasure
+  driveStraight(24);					//remeasure
   turn(-90);
   driveStraight(-24);
   turn(-90);
-  driveStraight(-10);
+  driveStraight(-210);
   IRDrive(-3);
   if(IRDetection == false){
   	turn(-45);
@@ -223,12 +222,15 @@ task main(){
  	if(IRDetection == true){
  		turn(-90);
  		raiseArmFull();
+ 		raiseLinearSlide(0.9);
  		driveStraight(10);
  		servo[autoArm] = 0;
  		driveStraight(-10);
+ 		raiseLinearSlide(-0.9);
+ 		lowerArm();
  		turn(-90);
  		driveStraight(10.5);
  		turn(-90);
- 		driveStraight(-25);
+ 		driveFullPwr(-25);
  	}
 }
