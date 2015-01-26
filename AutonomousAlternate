@@ -19,7 +19,7 @@ Cascade Effect
 Team 4410 ARC Lightning
 Autonomous Code
 Christopher Zhao
-version 1.0, 1/25/2015
+version 1.0b, 1/25/2015
 */
 
 #include "JoystickDriver.c"																	//waitForStart() defined here
