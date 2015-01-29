@@ -10,6 +10,12 @@
 #define LEFT 90
 #define RIGHT -90
 
+//Amount of torque produced by tetrix motor -- assume full power
+#define MOTOR_TORQUE __________________
+
+//The radius of the robot
+#define RADIUS ___________________
+
 //Define Util functions
 
 //Resets all encoders, and stops motors
