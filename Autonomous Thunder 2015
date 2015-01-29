@@ -4,13 +4,48 @@
 
 //Define Constants
 
+//The 4 Direction Options, direction is angle relative to the robot's current //position. I.E. 0 -> Straight ahead, 90 -> 90 degrees (left) of robot ...
+#define FORWARD 0
+#define BACKWARDS 180
+#define LEFT 90
+#define RIGHT -90
+
 //Define Util functions
+
+//Resets all encoders, and stops motors
+void clear () {
+   //TODO Clear all motor encoders, and stop all motors
+}
+
+//Conversion factor between ticks and cm
+//ticks = cm * tickRatio
+float tickRatio;
+
+//Converts given distance (cm) into ticks, rounding to the nearest integer, and //returns the result
+int convertToTicks (int cm) {
+   return (int) (cm * tickRatio + 0.5);
+}
+
+//Moves the robot in given direction (relative to its current direction) for given //distance (cm)
+//TODO  pid adjustments for tetrix motors
+void move(int direction,int distance) {
+   turn(direction);
+   int ticks = convertToTicks(distance);
+   clear();
+
+   while (nMotorEncoder[RIGHT_MOTOR] != ticks) {
+      motor[RIGHT] = 50;
+      motor[LEFT] = 50;
+   }
+
+   clear();
+}
 
 //Define strategy
 
-//Initialize all necessary fields and set mechanical components to their inital positions
+//Initialize all necessary fields and set mechanical components to their inital //positions
 void initialization () {
-   
+   //TODO
 }
 
 //Executes the autonomous logic
