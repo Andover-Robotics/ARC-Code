@@ -1,0 +1,55 @@
+//<snip Pragma initialization>
+
+#include "JoystickDriver.c"
+
+//Define Constants
+
+//Define Util functions
+
+//Define strategy
+
+//Initialize all necessary fields and set mechanical components to their inital positions
+void initialization () {
+   
+}
+
+//Executes the autonomous logic
+void run () {
+   //Ramp Version
+   
+   //Lower Area Version
+   {
+      Move Forward
+      if IR Beacon is in Sector 5 then
+         int a  = ; //The Amount of ticks to move
+         int b = ;
+         move(LEFT,a);
+         move(UP,b);
+         
+         //*Knocks over pole*
+      else
+         int a = ;
+         int b = ;
+         move(LEFT,a);
+         move(UP,b);
+         turn(RIGHT);
+         
+         if IR Beacon is in Sector 5 then
+            turn(RIGHT);
+            int c = ;
+            int d = ; //d ~= a, but maybe is slightly bigger
+            move(DOWN,c);
+            move(RIGHT,d);
+            
+            //*Knocks over pole*
+         else
+            int c = ;
+            int d = ;
+            move(RIGHT,c);
+            move(135, d);
+   }
+}
+
+task main {
+   waitForStart();
+}
