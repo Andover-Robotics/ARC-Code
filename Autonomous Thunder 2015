@@ -56,6 +56,59 @@ void initialization () {
 
 //Executes the autonomous logic
 void run () {
+ 
+   //Safi's Thing:
+   //The linear slide is raised
+ 			nMotorEncoder[slide] = 0;
+ 			nMotorEncoderTarget[slide] = ???;
+			motor[slide] = 30;
+			
+ 	 //The motor encoders are reset
+ 			nMotorEncoder[L] = 0;
+ 			nMotorEncoder[R] = 0;
+ 			
+ 	 //The motors' target is set
+ 			nMotorEncoderTarget[L] = 13750.56;
+ 			nMotorEncoderTarget[R] = 13750.56;
+ 	 
+ 	 //The motors run until target is reached
+ 			motor[L] = 50;
+ 			motor[R] = 50;
+ 			
+ 	 //The motor encoders are reset
+ 			nMotorEncoder[L] = 0;
+ 			nMotorEncoder[R] = 0;
+ 			
+ 	 //The goal mechanism is attatched		
+ 			servo[release] += 1;
+ 			
+ 	 //It turns left and motors run
+ 			turn(90);
+ 			motor[L] = 50;
+ 			motor[R] = 50;
+ 			wait10Msec(50) //guess
+ 			
+ 	 //The motors' target is set
+ 			nMotorEncoderTarget[L] = 13750.56;
+ 			nMotorEncoderTarget[R] = 13750.56;
+ 			
+ 	 //It turns left and motors run until target is reached
+ 			turn(90);
+ 			motor[L] = 50;
+ 			motor[R] = 50;
+  
+ 	 //It turns right and motors run
+			turn(-90);
+ 			motor[L] = 50;
+ 			motor[R] = 50;
+ 			wait10Msec(150) //guess
+ 			
+ 		
+
+			
+}
+
+/* OUTDATED IR STUFF
    //Ramp Version
    
    //Lower Area Version
@@ -89,6 +142,8 @@ void run () {
             move(RIGHT,c);
             move(135, d);
    }
+   
+*/
 }
 
 task main {
