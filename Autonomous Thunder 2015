@@ -32,6 +32,22 @@ int convertToTicks (int cm) {
    return (int) (cm * tickRatio + 0.5);
 }
 
+//Turns through the given angle (degrees).
+//Positive Angle -> LEFT
+//Negative Angle -> RIGHT
+void turn(int direction0) {
+   int direction = sgn(direction0); //The direction of the turn (i.e. left or right)
+   int radians = abs(convertToRadians(direction0));
+   
+   int ticks =  convertToTicks(radians * RADIUS);
+   
+   nMotorEncoderTarget[L] = ticks;
+   nMotorEncoderTarget[R] = ticks;
+   
+   motor[R] = ROBOT_SPEED * direction == 1 ? 1 : -1; //Information on the (?:) operator can be found at http://www.robotc.net/wikiarchive/Tertiary_operators
+   motor[L] = ROBOT_SPEED * direction == 1 ? -1 : 1;
+}
+
 //Moves the robot in given direction (relative to its current direction) for given //distance (cm)
 //TODO  pid adjustments for tetrix motors
 void move(int direction,int distance) {
