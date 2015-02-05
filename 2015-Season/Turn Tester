@@ -1,0 +1,61 @@
+//Uploaded 2/5/15
+
+#pragma config(Hubs,  S1, HTMotor,  HTMotor,  HTMotor,  HTServo)
+#pragma config(Motor,  mtr_S1_C1_1,     L,             tmotorTetrix, openLoop, encoder)
+#pragma config(Motor,  mtr_S1_C1_2,     R,             tmotorTetrix, openLoop, reversed, encoder)
+#pragma config(Motor,  mtr_S1_C2_1,     belt,          tmotorTetrix, openLoop, encoder)
+#pragma config(Motor,  mtr_S1_C2_2,     slide,         tmotorTetrix, openLoop, encoder)
+#pragma config(Motor,  mtr_S1_C3_1,     sweep,         tmotorTetrix, openLoop)
+#pragma config(Motor,  mtr_S1_C3_2,     none,          tmotorTetrix, openLoop)
+#pragma config(Servo,  srvo_S1_C4_1,    release,              tServoStandard)
+#pragma config(Servo,  srvo_S1_C4_2,    servo2,               tServoNone)
+#pragma config(Servo,  srvo_S1_C4_3,    servo3,               tServoNone)
+#pragma config(Servo,  srvo_S1_C4_4,    servo4,               tServoNone)
+#pragma config(Servo,  srvo_S1_C4_5,    servo5,               tServoNone)
+#pragma config(Servo,  srvo_S1_C4_6,    servo6,               tServoNone)
+
+#define WHEEL_CIRCUMFERENCE 21.99
+#define WHEEL_RADIUS 3.5
+
+void clear() {
+
+				motor[L] = 0;
+				motor[R] = 0;
+				
+				nMotorEncoder[L] = 0;
+				nMotorEncoder[R] = 0;
+}
+
+void oid_turn (int dir_)
+{
+        int angle = abs (dir_);
+
+        if (dir_ < 0)
+        {
+                float cm = (2*PI*WHEEL_RADIUS) * angle/360;
+                int ticks = (cm *1440)/(WHEEL_CIRCUMFERENCE);
+                nMotorEncoderTarget[L] = -ticks;
+                nMotorEncoderTarget [R] = ticks;
+                motor[L] = -50;
+                motor[R] = 50;
+        }
+        if (dir_ > 0)
+        {
+                float cm = (2*PI*WHEEL_RADIUS) * angle/360;
+                int ticks = 1440*cm /(21.9911485751);
+                nMotorEncoderTarget[L] = ticks;
+                nMotorEncoderTarget[R] = -ticks;
+                motor[L] = 50;
+                motor[R] = -50;
+        }
+
+}
+
+task main()
+{
+				clear();
+        oid_turn(45);
+        PlayImmediateTone(440,1000);
+        wait1Msec(2000);
+        //oid_turn(-90);
+}
