@@ -1,0 +1,96 @@
+
+int linearTicks = 2903;																			//number of ticks to raise linear slide
+int armTicks = 12;																					//number of ticks to raise arm 1 degree
+short armLevel = 0;
+bool slideDone = false;
+
+void clearLift(){                                         	//clears all encoders
+  nMotorEncoder[LinearSlide] = 0;
+  nMotorEncoder[ArmMotor] = 0;
+}
+task raiseLinearSlide(){
+	while(nMotorEncoder[LinearSlide] < linearTicks){
+			motor[LinearSlide] = 80;
+	}
+	motor[LinearSlide] = 0;
+	slideDone = true;
+	clearLift();
+}
+task lowerLinearSlide(){
+	while(nMotorEncoder[LinearSlide] > -linearTicks){
+			motor[LinearSlide] = 80;
+	}
+	motor[LinearSlide] = 0;
+	slideDone = true;
+	clearLift();
+}
+task killSlide(){
+	while(true){
+		if(slideDone == true){
+			StopTask(raiseLinearSlide);
+			StopTask(lowerLinearSlide);
+			slideDone = false;
+		}
+		else{}
+	}
+}
+void tRaiseArm(){
+	for(int x = 0; x < 3; x++){
+		motor[ArmMotor] = 80;
+		servo[ArmJoint] += -20;
+		wait10Msec(120);
+	}
+	motor[ArmMotor] = 0;
+	clearLift();
+}
+void tLowerArm(){
+	for(int x = 0; x < 3; x++){
+		motor[ArmMotor] = -80;
+		servo[ArmJoint] += 20;
+		wait10Msec(110);
+	}
+	motor[ArmMotor] = 0;
+	clearLift();
+}
+void moveArm(int deg){
+	while(nMotorEncoder[ArmMotor] < deg*armTicks && deg > 0){
+		motor[ArmMotor] = 80;
+		servo[ArmJoint] = 240 - (nMotorEncoder[ArmMotor]/12);
+	}
+	while(nMotorEncoder[ArmMotor] > deg*armTicks && deg < 0){
+		motor[ArmMotor] = -80;
+		servo[ArmJoint] = 240;
+	}
+	motor[ArmMotor] = 0;
+}
+task armProcessLow(){
+	while(nMotorEncoder[ArmMotor] < 90*armTicks){
+		motor[ArmMotor] = 80;
+		servo[ArmJoint] = 240 - (nMotorEncoder[ArmMotor]/12);
+		servo[autoArm] = 254 - (nMotorEncoder[ArmMotor]/12);
+	}
+	motor[ArmMotor] = 0;
+	armLevel = 1;
+}
+task armProcessHigh(){
+	while(nMotorEncoder[ArmMotor] < 110*armTicks){
+		motor[ArmMotor] = 80;
+		servo[ArmJoint] = 240 - (nMotorEncoder[ArmMotor]/12);
+		servo[autoArm] = 254 - (nMotorEncoder[ArmMotor]/12);
+	}
+	motor[ArmMotor] = 0;
+	armLevel = 2;
+}
+task armStop(){
+	while(true){
+		if(armLevel == 1){
+			StopTask(armProcessLow);
+			armLevel = 0;
+		}
+		if(armLevel == 2){
+			StopTask(armProcessHigh);
+			armLevel = 0;
+		}
+		if(armLevel == 0){}
+	}
+}
