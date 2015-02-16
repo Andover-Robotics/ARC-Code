@@ -3,7 +3,7 @@
 float ipt = 12;//8.7266463;																	//inches driven per 1 thousand ticks																								Test this value, should be more accurate
 bool IRDetection = false;																		//denotes whether or not IR has been detected
 int sonarTicks = 0;
-int nullValue;
+int nullValue = 594;
 
 void clearDrive(){
 	nMotorEncoder[L] = 0;
@@ -95,20 +95,21 @@ void hardTurn(int deg){                                   			//function for turn
    wait10Msec(10);
    clearDrive();
 }
-void gyroTurn(float deg){
+void gyroTurn(int deg){
 	float turnAmount = 0;
-	while(turnAmount < deg
+	while(turnAmount < deg//clockwise
 		&& deg > 0){
-			motor[L] = -60;
-			motor[R] = 60;
-			turnAmount += SensorValue[Gyro] * 0.001 - nullValue;
-			wait1Msec(1);
-		}
-	while(turnAmount > deg
-		&& deg < 0){
+			nxtDisplayCenteredTextLine(3, "%i", turnAmount);
 			motor[L] = 60;
 			motor[R] = -60;
-			turnAmount += SensorValue[Gyro] * 0.001 - nullValue;
+			turnAmount += (SensorValue[Gyro] - nullValue) * 0.001;
+			wait1Msec(1);
+		}
+	while(turnAmount > deg//counterclockwise
+		&& deg < 0){
+			motor[L] = -60;
+			motor[R] = 60;
+			turnAmount += (SensorValue[Gyro] - nullValue) * 0.001;
 			wait1Msec(1);
 		}
 	motor[L] = 0;
