@@ -1,6 +1,6 @@
 
 int linearTicks = 2903;																			//number of ticks to raise linear slide
-int armTicks = 12;																					//number of ticks to raise arm 1 degree
+int armTicks = 120;																					//number of ticks to raise arm 1 degree
 short armLevel = 0;
 bool slideDone = false;
 
@@ -66,17 +66,17 @@ void moveArm(int deg){
 task armProcessLow(){
 	while(nMotorEncoder[ArmMotor] < 90*armTicks){
 		motor[ArmMotor] = 80;
-		servo[ArmJoint] = 240 - (nMotorEncoder[ArmMotor]/12);
-		servo[autoArm] = 254 - (nMotorEncoder[ArmMotor]/12);
+		servo[ArmJoint] = 240 - (nMotorEncoder[ArmMotor]/120);
+		servo[autoArm] = 254 - (nMotorEncoder[ArmMotor]/120);
 	}
 	motor[ArmMotor] = 0;
 	armLevel = 1;
 }
 task armProcessHigh(){
-	while(nMotorEncoder[ArmMotor] < 110*armTicks){
+	while(nMotorEncoder[ArmMotor] < 115*armTicks){
 		motor[ArmMotor] = 80;
-		servo[ArmJoint] = 240 - (nMotorEncoder[ArmMotor]/12);
-		servo[autoArm] = 254 - (nMotorEncoder[ArmMotor]/12);
+		servo[ArmJoint] = 240 - (nMotorEncoder[ArmMotor]/120);
+		servo[autoArm] = 254 - (nMotorEncoder[ArmMotor]/120);
 	}
 	motor[ArmMotor] = 0;
 	armLevel = 2;
