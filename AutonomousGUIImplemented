@@ -1,5 +1,5 @@
 #pragma config(Hubs,  S1, HTMotor,  HTServo,  HTMotor,  none)
-#pragma config(Sensor, S2,     EOPD,           sensorAnalogActive)
+#pragma config(Sensor, S2,     Sonar,          sensorSONAR)
 #pragma config(Sensor, S3,     IRSensor,       sensorHiTechnicIRSeeker1200)
 #pragma config(Sensor, S4,     Gyro,           sensorI2CHiTechnicGyro)
 #pragma config(Motor,  mtr_S1_C1_1,     L,             tmotorTetrix, openLoop, reversed, encoder)
@@ -8,7 +8,7 @@
 #pragma config(Motor,  mtr_S1_C3_2,     ArmMotor,      tmotorTetrix, openLoop, reversed, encoder)
 #pragma config(Servo,  srvo_S1_C2_1,    Hook,                 tServoStandard)
 #pragma config(Servo,  srvo_S1_C2_2,    ArmJoint,             tServoStandard)
-#pragma config(Servo,  srvo_S1_C2_3,    EOPDservo,            tServoStandard)
+#pragma config(Servo,  srvo_S1_C2_3,    SonarServo,           tServoStandard)
 #pragma config(Servo,  srvo_S1_C2_4,    autoArm,              tServoStandard)
 #pragma config(Servo,  srvo_S1_C2_5,    servo5,               tServoNone)
 #pragma config(Servo,  srvo_S1_C2_6,    servo6,               tServoNone)
@@ -20,18 +20,15 @@ Cascade Effect
 Team 4410 ARC Lightning
 Autonomous Code
 Christopher Zhao
-version 1.0, 2/10/2015
+version 1.0.2, 2/16/2015
 */
 
 #include "JoystickDriver.c"
 #include "hitechnic-gyro.h"
 #include "hitechnic-eopd.h"
 #include "lego-ultrasound.h"
-
-float ipt = 12;//8.7266463;																	//inches driven per 1 thousand ticks																								Test this value, should be more accurate
-int linearTicks = 2903;																			//number of ticks to raise linear slide
-int armTicks = 12;																					//number of ticks to raise arm 1 degree
-bool IRDetection = false;																		//denotes whether or not IR has been detected
+#include "ArmFunctions.c"
+#include "DriveFunctions.c"
 
 //buttons
 int buttonRight = 1;
@@ -44,142 +41,28 @@ void stopMotors(){
 	motor[LinearSlide] = 0;
 	motor[ArmMotor] = 0;
 }
-void clear(){                                         			//clears all encoders
-  nMotorEncoder[L] = 0;
-  nMotorEncoder[R] = 0;
-  nMotorEncoder[LinearSlide] = 0;
-  nMotorEncoder[ArmMotor] = 0;
-}
-void driveStraight(int in){                           			//function which drives straight distance in
-  while(nMotorEncoder[L] < (in/ipt) * 1000            			//while the encoders read less than (desired inches*1000 ticks/ipt)
-    && in >= 0){                                      			//on the condition that the number of inches desired is greater/equal to zero
-      motor[L] = 80;                                  			//run left motor at 80% power
-      motor[R] = 80;                                  			//run right motor at 80% power
-    }
-  while(nMotorEncoder[L] > (in/ipt) * 1000            			//while the encoders read greater than (desired inches*1000 ticks/ipt)
-    && in < 0){                                       			//on the condition that the number of inches desired is less than 0)
-      motor[L] = -80;                                 			//run left motor in reverse at 80% power
-      motor[R] = -80;                                 			//run right motor in reverse at 80% power
-    }
-  motor[L] = 0;                                       			//Stops left motor
-  motor[R] = 0;                                       			//Stops right motor
-  wait10Msec(10);	                                    			//waits .1 seconds
-  clear();                                            			//clears encoders
-}
-void driveFullPwr(int in){
-	while(nMotorEncoder[L] < (in/ipt) * 1000            			//while the encoders read less than (desired inches*1000 ticks/ipt)
-    && in >= 0){                                      			//on the condition that the number of inches desired is greater/equal to zero
-      motor[L] = 100;                                  			//run left motor at 80% power
-      motor[R] = 100;                                  			//run right motor at 80% power
-    }
-  while(nMotorEncoder[L] > (in/ipt) * 1000            			//while the encoders read greater than (desired inches*1000 ticks/ipt)
-    && in < 0){                                       			//on the condition that the number of inches desired is less than 0)
-      motor[L] = -100;                                 			//run left motor in reverse at 80% power
-      motor[R] = -100;                                 			//run right motor in reverse at 80% power
-    }
-  motor[L] = 0;                                       			//Stops left motor
-  motor[R] = 0;                                       			//Stops right motor
-  wait10Msec(10);	                                    			//waits .1 seconds
-  clear();                                            			//clears encoders
-}
-void hardTurn(int deg){                                   	//function for turning # of degrees, deg
-  while(nMotorEncoder[L] < (deg*21)		           						//while the encoder does not read the desired value of (deg/360)*(15pi in/ipt)*1000ticks
-    && deg > 0){                                      			//on the condition that the angle desired is positive
-      motor[R] = 70;                                  			//runs right motor at 70% power
-      motor[L] = -70;                                 			//runs left motor at -70% power
-    }
-  while(nMotorEncoder[L] > (deg*21)		                			//while the encoder does not read the desired value of (deg/360)*(15pi in/ipt)*1000ticks
-    && deg < 0){                                      			//on the condition that the angle desired is positive
-      motor[R] = -70;                                 			//runs right motor at -70% power
-      motor[L] = 70;                                  			//runs left motor at 70% power
-    }
-   stopMotors();
-}
-void raiseLinearSlide(float per){
-	while(nMotorEncoder[LinearSlide] < per * linearTicks
-		&& per > 0){
-			motor[LinearSlide] = 80;
-	}
-	while(nMotorEncoder[LinearSlide] > per * linearTicks
-		&& per < 0){
-			motor[LinearSlide] = -80;
-		}
-	motor[LinearSlide] = 0;
-	clear();
-}
-void raiseArm(){
-	for(int x = 0; x < 3; x++){
-		clear();
-		nMotorEncoderTarget[ArmMotor] = 360;
-		motor[ArmMotor] = 80;
-		servo[ArmJoint] += -20;
-	}
-	motor[ArmMotor] = 0;
-}
-void lowerArm(){
-	for(int x = 0; x < 3; x++){
-		clear();
-		nMotorEncoderTarget[ArmMotor] = -360;
-		motor[ArmMotor] = -80;
-		servo[ArmJoint] += 20;
-	}
-	motor[ArmMotor] = 0;
-}
-void raiseArmFull(){
-	for(int x = 0; x < 4; x++){
-		clear();
-		nMotorEncoderTarget[ArmMotor] = 360;
-		motor[ArmMotor] = 80;
-		servo[ArmJoint] += -20;
-	}
-	motor[ArmMotor] = 0;
-}
-void tRaiseArm(){
-	for(int x = 0; x < 3; x++){
-		motor[ArmMotor] = 80;
-		servo[ArmJoint] += -20;
-		wait10Msec(120);
-	}
-	motor[ArmMotor] = 0;
-	clear();
-}
-void tLowerArm(){
-	for(int x = 0; x < 3; x++){
-		motor[ArmMotor] = -80;
-		servo[ArmJoint] += 20;
-		wait10Msec(110);
-	}
-	motor[ArmMotor] = 0;
-	clear();
+void clear(){
+	nMotorEncoder[L] = 0;
+	nMotorEncoder[R] = 0;
+	nMotorEncoder[ArmMotor] = 0;
+	nMotorEncoder[LinearSlide] = 0;
 }
 void initiallize(){
 	servoChangeRate[ArmJoint] = 2;
-	servoChangeRate[Hook] = 9;
+	servoChangeRate[Hook] = 15;
 	servo[ArmJoint] = 240;
 	servo[Hook] = 0;
 	servo[autoArm] = 254;
 	clear();
 	waitForStart();
 }
-void IRDrive(int in){																					//drives robot a set distance or until IR is detected, does not drive when IR already found
-	while(nMotorEncoder[L] < (in/ipt)*1000
-			&& SensorValue[IRSensor] != 5 ){												//while the encoder is less than 1000 * desired inches/inches per thousand
-			motor[L] = 80;																					//Left motor drive forward
-			motor[R] = 80;																					//Right motor drive forward
-		}
-	motor[L] = 0;																								//stop Left motor
-	motor[R] = 0;																								//stop Right motor
-	if(SensorValue[IRSensor] == 5){
-		IRDetection = true;
-	}
-	clear();
-}
 task main()
 {
-	bool taskBool[6];                                   				//Determines whether or not a certain task gets enacted
-	taskBool[5] = false;
+	//begin GUI
+	bool taskBool[5];                                   				//Determines whether or not a certain task gets enacted
+	taskBool[4] = false;
 	string taskList[4] =
-	  {"Starting Area", "Goal Type", "Kickstand", "Drag"};     	//List of different tasks
+	{"Starting Area", "Goal Type", "Kickstand", "Drag"};     	//List of different tasks
 	string taskOption[4][2];
 	taskOption[0][0] = "Ramp";
 	taskOption[0][1] = "Parking Zone";
@@ -192,35 +75,35 @@ task main()
 	short taskNumber = 0;
 	short taskOptionNumber = 0;
 	while(taskNumber < 3){
-		nxtDisplayCenteredTextLine(3, "%s", 
-			taskList[taskNumber]);
-		nxtDisplayCenteredTextLine(5, "%s", 
-			taskOption[taskNumber][taskOptionNumber]);
+		nxtDisplayCenteredTextLine(3, "%s",
+		taskList[taskNumber]);
+		nxtDisplayCenteredTextLine(5, "%s",
+		taskOption[taskNumber][taskOptionNumber]);
 		if(nNxtButtonPressed == buttonRight){
 			taskOptionNumber = 1;
 		}
 		if(nNxtButtonPressed == buttonLeft){
 			taskOptionNumber = 0;
 		}
-		if(nNxtButtonPressed == buttonEnter && 
+		if(nNxtButtonPressed == buttonEnter &&
 			taskOptionNumber == 0){
-				taskBool[taskNumber] = true;
-				taskNumber++;
-				wait10Msec(100);
+			taskBool[taskNumber] = true;
+			taskNumber++;
+			wait10Msec(100);
 		}
 		if(nNxtButtonPressed == buttonEnter &&
 			taskOptionNumber == 1){
-				taskBool[taskNumber] = false;	
-				taskNumber++;
-				wait10Msec(100);
+			taskBool[taskNumber] = false;
+			taskNumber++;
+			wait10Msec(100);
 		}
 		if(nNxtButtonPressed == -1){}
 	}
-	if(taskBool[3] == true){
-		taskBool[4] = false;
-		taskBool[5] = true;
+	if(taskBool[2] == true || taskBool[1] == false){
+		taskBool[3] = false;
+		taskBool[4] = true;
 	}
-	while(taskBool[3] == true && taskBool[5] == false){
+	while(taskBool[4] == false){
 		nxtDisplayCenteredTextLine(3, "%s", taskList[3]);
 		nxtDisplayCenteredTextLine(5, "%s", taskOption[3][taskOptionNumber]);
 		if(nNxtButtonPressed == buttonRight){
@@ -229,21 +112,155 @@ task main()
 		if(nNxtButtonPressed == buttonLeft){
 			taskOptionNumber = 0;
 		}
-		if(nNxtButtonPressed == buttonEnter && 
+		if(nNxtButtonPressed == buttonEnter &&
 			taskOptionNumber == 0){
-				taskBool[4] = true;
-				wait10Msec(100);
-				taskBool[5] = true;
+			taskBool[3] = true;
+			wait10Msec(100);
+			taskBool[4] = true;
 		}
 		if(nNxtButtonPressed == buttonEnter &&
 			taskOptionNumber == 1){
-				taskBool[4] = false;	
-				wait10Msec(100);
-				taskBool[5] = true;
+			taskBool[3] = false;
+			wait10Msec(100);
+			taskBool[4] = true;
 		}
 		if(nNxtButtonPressed == -1){}
 	}
-	if(taskBool[5] == true){}
+	if(taskBool[4] == true){}
 	//ready, begin autonomous procedure
+	bool startArea = taskBool[0];
+	bool goal = taskBool[1];
+	bool kickstand = taskBool[2];
+	bool drag = taskBool[3];
 	initiallize();
+	StartTask(armStop);
+	StartTask(killSlide);
+	if(goal == true){
+		StartTask(armProcessLow);
+	}
+	else{}
+	if(startArea == true){
+		driveStraight(72);
+		if(goal == true){
+			StartTask(raiseLinearSlide);
+			SonarDrive(10);
+			servo[ArmJoint] = 0;
+			StartTask(lowerLinearSlide);
+			moveArm(-90);
+			while(nMotorEncoder[L] > -sonarTicks){
+				motor[L] = -80;
+				motor[R] = -80;
+			}
+			motor[L] = 0;
+			motor[R] = 0;
+			clearDrive();
+		}
+		if(goal == false || kickstand == true){
+			gyroTurn(90);
+			driveStraight(24.75);
+			gyroTurn(90);
+			driveStraight(24.5);
+			gyroTurn(90);
+			driveStraight(-26);
+		}
+		if(drag == true){
+			gyroTurn(180);
+			while(nMotorEncoder[L] > -sonarTicks){
+				motor[L] = -80;
+				motor[R] = -80;
+			}
+			motor[L] = 0;
+			motor[R] = 0;
+			clearDrive();
+			servo[Hook] = 0;
+			wait10Msec(100);
+			while(nMotorEncoder[L] < sonarTicks){
+				motor[L] = 80;
+				motor[R] = 80;
+			}
+			motor[L] = 0;
+			motor[R] = 0;
+			clearDrive();
+			gyroTurn(-45);
+			driveStraight(102);
+			gyroTurn(-135);
+			driveStraight(-10);
+			servo[Hook] = 120;
+		}
+	}
+	if(startArea == false){
+		if(goal == true){
+			gyroTurn(-30);
+			driveStraight(125);
+			gyroTurn(30);
+			SonarDrive(10);
+			servo[ArmJoint] = 0;
+			wait10Msec(150);
+			if(drag == true){
+				driveStraight(-10);
+				gyroTurn(180);
+				driveStraight(-10);
+				servo[Hook] = 0;
+				while(nMotorEncoder[L] < sonarTicks){
+					motor[L] = 80;
+					motor[R] = 80;
+				}
+				motor[L] = 0;
+				motor[R] = 0;
+				clearDrive();
+				driveStraight(125);
+				gyroTurn(-150);
+			}
+			if(kickstand == true){
+				while(nMotorEncoder[L] > -sonarTicks){
+					motor[L] = -80;
+					motor[R] = -80;
+				}
+				motor[L] = 0;
+				motor[R] = 0;
+				clearDrive();
+				gyroTurn(-30);
+				driveStraight(-42);
+				gyroTurn(-60);
+				driveStraight(-33);
+			}
+		}
+		if(goal == false){
+			driveStraight(48);
+			
+		}
+	}
+	if(goal == false || kickstand == true){
+		IRDrive(-5);
+		if(IRDetection == false){
+			driveStraight(-5);
+			gyroTurn(-45);
+			IRDrive(-10);
+		}
+		if(IRDetection == false){
+			driveStraight(-5);
+			gyroTurn(-45);
+			IRDrive(-10);
+		}
+		if(IRDetection == true
+			&& goal == false){
+			StartTask(armProcessHigh);
+			StartTask(raiseLinearSlide);
+			gyroTurn(90);
+			SonarDrive(10);
+			servo[autoArm] = 0;
+			wait10Msec(100);
+			StartTask(lowerLinearSlide);
+			if(kickstand == true){
+				servo[autoArm] = 120;
+				driveStraight(-10);
+				gyroTurn(-90);
+			}
+		}
+		if(kickstand == true){
+			driveStraight(-13);
+			gyroTurn(-90);
+			driveFullPwr(-25);
+		}
+	}
 }
