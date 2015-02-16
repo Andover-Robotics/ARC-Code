@@ -1,0 +1,117 @@
+
+
+float ipt = 12;//8.7266463;																	//inches driven per 1 thousand ticks																								Test this value, should be more accurate
+bool IRDetection = false;																		//denotes whether or not IR has been detected
+int sonarTicks = 0;
+int nullValue;
+
+void clearDrive(){
+	nMotorEncoder[L] = 0;
+	nMotorEncoder[R] = 0;
+}
+void driveStraight(int in){                           			//function which drives straight distance in
+  while(nMotorEncoder[L] < (in/ipt) * 1000            			//while the encoders read less than (desired inches*1000 ticks/ipt)
+    && in >= 0){                                      			//on the condition that the number of inches desired is greater/equal to zero
+      motor[L] = 80;                                  			//run left motor at 80% power
+      motor[R] = 80;                                  			//run right motor at 80% power
+    }
+  while(nMotorEncoder[L] > (in/ipt) * 1000            			//while the encoders read greater than (desired inches*1000 ticks/ipt)
+    && in < 0){                                       			//on the condition that the number of inches desired is less than 0)
+      motor[L] = -80;                                 			//run left motor in reverse at 80% power
+      motor[R] = -80;                                 			//run right motor in reverse at 80% power
+    }
+  motor[L] = 0;                                       			//Stops left motor
+  motor[R] = 0;                                       			//Stops right motor
+  wait10Msec(10);	                                    			//waits .1 seconds
+  clearDrive();                                            	//clears encoders
+}
+void driveFullPwr(int in){
+	while(nMotorEncoder[L] < (in/ipt) * 1000            			//while the encoders read less than (desired inches*1000 ticks/ipt)
+    && in >= 0){                                      			//on the condition that the number of inches desired is greater/equal to zero
+      motor[L] = 100;                                  			//run left motor at 80% power
+      motor[R] = 100;                                  			//run right motor at 80% power
+    }
+  while(nMotorEncoder[L] > (in/ipt) * 1000            			//while the encoders read greater than (desired inches*1000 ticks/ipt)
+    && in < 0){                                       			//on the condition that the number of inches desired is less than 0)
+      motor[L] = -100;                                 			//run left motor in reverse at 80% power
+      motor[R] = -100;                                 			//run right motor in reverse at 80% power
+    }
+  motor[L] = 0;                                       			//Stops left motor
+  motor[R] = 0;                                       			//Stops right motor
+  wait10Msec(10);	                                    			//waits .1 seconds
+  clearDrive();                                            	//clears encoders
+}
+void hardTurn(int deg){                                   	//function for turning # of degrees, deg
+  while(nMotorEncoder[L] < (deg*21)		           						//while the encoder does not read the desired value of (deg/360)*(15pi in/ipt)*1000ticks
+    && deg > 0){                                      			//on the condition that the angle desired is positive
+      motor[R] = 70;                                  			//runs right motor at 70% power
+      motor[L] = -70;                                 			//runs left motor at -70% power
+    }
+  while(nMotorEncoder[L] > (deg*21)		                			//while the encoder does not read the desired value of (deg/360)*(15pi in/ipt)*1000ticks
+    && deg < 0){                                      			//on the condition that the angle desired is positive
+      motor[R] = -70;                                 			//runs right motor at -70% power
+      motor[L] = 70;                                  			//runs left motor at 70% power
+    }
+   motor[L] = 0;
+   motor[R] = 0;
+   clearDrive();
+}
+void IRDrive(int in){																				//drives robot a set distance or until IR is detected, does not drive when IR already found
+	while(nMotorEncoder[L] < (in/ipt)*1000
+			&& SensorValue[IRSensor] != 5 ){											//while the encoder is less than 1000 * desired inches/inches per thousand
+			motor[L] = 80;																				//Left motor drive forward
+			motor[R] = 80;																				//Right motor drive forward
+		}
+	motor[L] = 0;																							//stop Left motor
+	motor[R] = 0;																							//stop Right motor
+	if(SensorValue[IRSensor] == 5){
+		IRDetection = true;
+	}
+	clearDrive();
+}
+void SonarDrive(int val){
+	while(SensorValue[Sonar] > val){
+		motor[L] = 60;
+		motor[R] = 60;
+	}
+	motor[L] = 0;
+	motor[R] = 0;
+	sonarTicks = nMotorEncoder[L];
+	clearDrive();
+}
+void hardTurn(int deg){                                   			//function for turning # of degrees, deg
+  while(nMotorEncoder[R] < (deg*15.5)		           					//while the encoder does not read the desired value of (deg/360)*(15pi in/ipt)*1000ticks
+    && deg > 0){                                      			//on the condition that the angle desired is positive
+      motor[R] = 70;                                  			//runs right motor at 70% power
+      motor[L] = -70;                                 			//runs left motor at -70% power
+    }
+  while(nMotorEncoder[L] < -(deg*21)                			//while the encoder does not read the desired value of (deg/360)*(15pi in/ipt)*1000ticks
+    && deg < 0){                                      			//on the condition that the angle desired is positive
+      motor[R] = -70;                                 			//runs right motor at -70% power
+      motor[L] = 70;                                  			//runs left motor at 70% power
+    }
+   motor[L] = 0;
+   motor[R] = 0;
+   wait10Msec(10);
+   clearDrive();
+}
+void gyroTurn(float deg){
+	float turnAmount = 0;
+	while(turnAmount < deg
+		&& deg > 0){
+			motor[L] = -60;
+			motor[R] = 60;
+			turnAmount += SensorValue[Gyro] * 0.001 - nullValue;
+			wait1Msec(1);
+		}
+	while(turnAmount > deg
+		&& deg < 0){
+			motor[L] = 60;
+			motor[R] = -60;
+			turnAmount += SensorValue[Gyro] * 0.001 - nullValue;
+			wait1Msec(1);
+		}
+	motor[L] = 0;
+	motor[R] = 0;
+	clearDrive();
+}
