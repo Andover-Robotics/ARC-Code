@@ -1,14 +1,15 @@
 #pragma config(Hubs,  S1, HTMotor,  HTServo,  HTMotor,  none)
+#pragma config(Sensor, S1,     ,               sensorI2CMuxController)
 #pragma config(Sensor, S2,     Sonar,          sensorSONAR)
 #pragma config(Sensor, S3,     IRSensor,       sensorHiTechnicIRSeeker1200)
 #pragma config(Sensor, S4,     Gyro,           sensorI2CHiTechnicGyro)
 #pragma config(Motor,  mtr_S1_C1_1,     L,             tmotorTetrix, openLoop, reversed, encoder)
 #pragma config(Motor,  mtr_S1_C1_2,     R,             tmotorTetrix, openLoop, encoder)
 #pragma config(Motor,  mtr_S1_C3_1,     LinearSlide,   tmotorTetrix, openLoop, reversed, encoder)
-#pragma config(Motor,  mtr_S1_C3_2,     ArmMotor,      tmotorTetrix, openLoop, reversed, encoder)
+#pragma config(Motor,  mtr_S1_C3_2,     ArmMotor,      tmotorTetrix, openLoop, encoder)
 #pragma config(Servo,  srvo_S1_C2_1,    Hook,                 tServoStandard)
 #pragma config(Servo,  srvo_S1_C2_2,    ArmJoint,             tServoStandard)
-#pragma config(Servo,  srvo_S1_C2_3,    SonarServo,           tServoStandard)
+#pragma config(Servo,  srvo_S1_C2_3,    servo4,               tServoNone)
 #pragma config(Servo,  srvo_S1_C2_4,    autoArm,              tServoStandard)
 #pragma config(Servo,  srvo_S1_C2_5,    servo5,               tServoNone)
 #pragma config(Servo,  srvo_S1_C2_6,    servo6,               tServoNone)
@@ -23,47 +24,44 @@ Christopher Zhao
 version 1.0.2, 2/16/2015
 */
 
-#include "JoystickDriver.c"
-#include "hitechnic-gyro.h"
-#include "hitechnic-eopd.h"
-#include "lego-ultrasound.h"
-#include "ArmFunctions.c"
-#include "DriveFunctions.c"
+#include "JoystickDriver.c"																	//Contains waitForStart(), required for FCS field and competition
+#include "ArmFunctions.c"																		//File contains library for arm/linear slide movement
+#include "DriveFunctions.c"																	//File contains library for driving
 
-//buttons
-int buttonRight = 1;
-int buttonLeft = 2;
-int buttonEnter = 3;
+//buttons																										//Refers to buttons along top row of NXT < O >
+int buttonRight = 1;																				//Rightmost button returns value 1
+int buttonLeft = 2;																					//Leftmost button returns value 2
+int buttonEnter = 3;																				//Middle button returns value 3
 
-void stopMotors(){
-	motor[L] = 0;
+void stopMotors(){																					//Basic function to stop all motors
+	motor[L] = 0;																							//Setting a motor to power 0% stops it
 	motor[R] = 0;
 	motor[LinearSlide] = 0;
 	motor[ArmMotor] = 0;
 }
-void clear(){
-	nMotorEncoder[L] = 0;
+void clear(){																								//Clears all encoders
+	nMotorEncoder[L] = 0;																			//Setting an encoder to any value clears it, set to 0 for straightforwardness
 	nMotorEncoder[R] = 0;
 	nMotorEncoder[ArmMotor] = 0;
 	nMotorEncoder[LinearSlide] = 0;
 }
-void initiallize(){
-	servoChangeRate[ArmJoint] = 2;
-	servoChangeRate[Hook] = 15;
-	servo[ArmJoint] = 240;
-	servo[Hook] = 0;
-	servo[autoArm] = 254;
-	clear();
-	waitForStart();
+void initiallize(){																					//Function detailing all initial routines
+	servoChangeRate[ArmJoint] = 5;														//Sets base change rate of ArmJoint (attached to bucket) to 5 positions/20 milliseconds
+	servoChangeRate[Hook] = 15;																//Sets base change rate of Hook to 15 positions/20 milliseconds
+	servo[ArmJoint] = 240;																		//Sets ArmJoint to neutral position in dock
+	servo[Hook] = 120;																				//Sets Hook to neutral position, raised up
+	servo[autoArm] = 254;																			//Sets Autonomous Arm to neutral position, angled below main arm
+	clear();																									//Clears all encoders
+	waitForStart();																						//Waits for signal from FCS software to start, required for competitions
 }
 task main()
 {
 	//begin GUI
-	bool taskBool[5];                                   				//Determines whether or not a certain task gets enacted
-	taskBool[4] = false;
+	bool taskBool[5];                                   			//Determines whether or not a certain task gets enacted
+	taskBool[4] = false;																			//taskBool[4] denotes whether or not the GUI is finished
 	string taskList[4] =
 	{"Starting Area", "Goal Type", "Kickstand", "Drag"};     	//List of different tasks
-	string taskOption[4][2];
+	string taskOption[4][2];																	//Creates a 2D array detailing various options in the format [Task][Option]
 	taskOption[0][0] = "Ramp";
 	taskOption[0][1] = "Parking Zone";
 	taskOption[1][0] = "Rolling";
@@ -72,195 +70,194 @@ task main()
 	taskOption[2][1] = "No";
 	taskOption[3][0] = "Yes";
 	taskOption[3][1] = "No";
-	short taskNumber = 0;
-	short taskOptionNumber = 0;
-	while(taskNumber < 3){
-		nxtDisplayCenteredTextLine(3, "%s",
+	short taskNumber = 0;																			//Placeholder value for determining which task is being deliberated by the GUI
+	short taskOptionNumber = 0;																//Placeholder value for which option user chooses for autonomous
+	while(taskNumber < 3){																		//Stops determination after 3 tasks
+		nxtDisplayCenteredTextLine(3, "%s",											//Displays the name of the task being deliberated onscreen
 		taskList[taskNumber]);
-		nxtDisplayCenteredTextLine(5, "%s",
+		nxtDisplayCenteredTextLine(5, "%s",											//Displays the name of the option currently selected for deliberated task
 		taskOption[taskNumber][taskOptionNumber]);
-		if(nNxtButtonPressed == buttonRight){
-			taskOptionNumber = 1;
+		if(nNxtButtonPressed == buttonRight){										//If the right button is pressed
+			taskOptionNumber = 1;																	//The option selected corresponds to taskOptionNumber 1
 		}
-		if(nNxtButtonPressed == buttonLeft){
-			taskOptionNumber = 0;
+		if(nNxtButtonPressed == buttonLeft){										//If the left button is pressed
+			taskOptionNumber = 0;																	//The option selected corresponds to taskOptionNumber 0
 		}
-		if(nNxtButtonPressed == buttonEnter &&
-			taskOptionNumber == 0){
-			taskBool[taskNumber] = true;
-			taskNumber++;
-			wait10Msec(100);
+		if(nNxtButtonPressed == buttonEnter &&									//If the enter button is pressed,
+			taskOptionNumber == 0){																//and the taskOptionNumber is 0
+			taskBool[taskNumber] = true;													//Set the option chosen for the deliberated task to 'true' and its corresponding action
+			taskNumber++;																					//Move on to deliberaate the next task
+			wait10Msec(100);																			//Pause program for 1 second
 		}
-		if(nNxtButtonPressed == buttonEnter &&
-			taskOptionNumber == 1){
-			taskBool[taskNumber] = false;
-			taskNumber++;
-			wait10Msec(100);
+		if(nNxtButtonPressed == buttonEnter &&									//If the enter button is pressed,
+			taskOptionNumber == 1){																//and the taskOptionNumber is 1
+			taskBool[taskNumber] = false;													//Set the option chosen for the deliberated task to 'false' and its corresponding action
+			taskNumber++;																					//Move on to deliberate the next task
+			wait10Msec(100);																			//Pause program for 1 second
 		}
-		if(nNxtButtonPressed == -1){}
+		if(nNxtButtonPressed == -1){}														//If no button is pressed, do nothing
 	}
-	if(taskBool[2] == true || taskBool[1] == false){
-		taskBool[3] = false;
-		taskBool[4] = true;
+	if(taskBool[2] == true || taskBool[1] == false){					//If the robot is chosen to find IR (by having either kickstand or center goal selected as autonomous parts)
+		taskBool[3] = false;																		//The robot will not drag rolling goals as there is no time
+		taskBool[4] = true;																			//GUI has finished deliberation of autonomous tasks and will move on to waitForStart()
 	}
-	while(taskBool[4] == false){
-		nxtDisplayCenteredTextLine(3, "%s", taskList[3]);
-		nxtDisplayCenteredTextLine(5, "%s", taskOption[3][taskOptionNumber]);
-		if(nNxtButtonPressed == buttonRight){
-			taskOptionNumber = 1;
+	while(taskBool[4] == false){															//If the GUI has not finished deliberation, due to neither kickstand or center goal being selected as autonomous parts
+		nxtDisplayCenteredTextLine(3, "%s", taskList[3]);				//Display the name of the task being deliberated; in this case it is whether to drag the rolling goals
+		nxtDisplayCenteredTextLine(5, "%s", 										//Display the options for the task; in this case 'yes' or 'no'
+		taskOption[3][taskOptionNumber]);
+		if(nNxtButtonPressed == buttonRight){										//If the right button is pressed
+			taskOptionNumber = 1;																	//The option selected corresponds to taskOptionNumber 1
 		}
-		if(nNxtButtonPressed == buttonLeft){
-			taskOptionNumber = 0;
+		if(nNxtButtonPressed == buttonLeft){										//If the left button is pressed
+			taskOptionNumber = 0;																	//The option selected corresponds to taskOptionNumber 0
 		}
-		if(nNxtButtonPressed == buttonEnter &&
-			taskOptionNumber == 0){
-			taskBool[3] = true;
-			wait10Msec(100);
-			taskBool[4] = true;
+		if(nNxtButtonPressed == buttonEnter &&									//If the enter button is pressed,
+			taskOptionNumber == 0){																//and taskOptionNumber is 0
+			taskBool[3] = true;																		//Set the option chosen for the deliberated task (in this case, dragging) to true and its corresponding action
+			wait10Msec(100);																			//Pause program for 1 second
+			taskBool[4] = true;																		//GUI is done with deliberation
 		}
-		if(nNxtButtonPressed == buttonEnter &&
-			taskOptionNumber == 1){
-			taskBool[3] = false;
-			wait10Msec(100);
-			taskBool[4] = true;
+		if(nNxtButtonPressed == buttonEnter &&									//If the enter button is pressed,
+			taskOptionNumber == 1){																//and taskOptionNumber is 1
+			taskBool[3] = false;																	//Set the option chosen for the deliberated task (in this case, dragging) to false and its corresponding action
+			wait10Msec(100);																			//Pause program for 1 second
+			taskBool[4] = true;																		//GUI is done with deliberation
 		}
-		if(nNxtButtonPressed == -1){}
+		if(nNxtButtonPressed == -1){}														//If no button is pressed, do nothing
 	}
-	if(taskBool[4] == true){}
+	if(taskBool[4] == true){}																	//If GUI is done, move on
 	//ready, begin autonomous procedure
-	bool startArea = taskBool[0];
+	bool startArea = taskBool[0];															//Assigning more identifiable names to booleans
 	bool goal = taskBool[1];
 	bool kickstand = taskBool[2];
 	bool drag = taskBool[3];
-	initiallize();
-	StartTask(armStop);
-	StartTask(killSlide);
-	if(goal == true){
-		StartTask(armProcessLow);
+	initiallize();																						//Begin initiallization
+	StartTask(armStop);																				//Begin background process to kill any tasks involving arms as soon as they finish
+	StartTask(killSlide);																			//Begin background process to kill any tasks involving the linear slide as soon as they finish
+	if(goal == true){																					//If a rolling goal is selected as the goal type to be scored in
+		StartTask(armProcessLow);																//Begin background process to raise the arm to the minor position (~90 degrees from neutral)
 	}
-	else{}
-	if(startArea == true){
-		driveStraight(72);
-		if(goal == true){
-			StartTask(raiseLinearSlide);
-			SonarDrive(10);
-			servo[ArmJoint] = 0;
-			StartTask(lowerLinearSlide);
-			moveArm(-90);
-			while(nMotorEncoder[L] > -sonarTicks){
-				motor[L] = -80;
-				motor[R] = -80;
+	else{}																										//Otherwise leave the arm alone
+	if(startArea == true){																		//If the robot starts on the ramp
+		driveStraight(72);																			//Drive off the ramp to the midpoint of the parallel edge
+		if(goal == true){																				//If a rolling goal is selected as the goal type to be scored in
+			StartTask(raiseLinearSlide);													//Begin background process to raise the linear slide to full extension
+			driveStraight(19);																		//Drive straight 19 inches to 60cm rolling goal
+			while(armLevel != 0 || slideDone != 0){}							//While neither the linear slide nor arm are fully extended
+			if(armLevel == 0 && slideDone == 0){									//If both are raised
+				servo[ArmJoint] = 0;																//Dump balls
+				wait10Msec(50);																			//Pause program for 1.5 seconds to allow servo to move
 			}
-			motor[L] = 0;
-			motor[R] = 0;
-			clearDrive();
+			StartTask(lowerLinearSlide);													//Begin to lower the linear slide
+			//moveArm(-90);																				//Lower the arm (omit)
+			driveStraight(-19);																		//Drive backwards 19 inches back to the midpoint
 		}
-		if(goal == false || kickstand == true){
-			gyroTurn(90);
-			driveStraight(24.75);
-			gyroTurn(90);
-			driveStraight(24.5);
-			gyroTurn(90);
-			driveStraight(-26);
+		if(goal == false || kickstand == true){									//If the IR is required for future tasks (either the center goal or kickstand are selected as parts)
+			gyroTurn(-90);																				//Turn 90 degrees counterclockwise (using a gyroscopic turn)
+			driveStraight(24.75);																	//Drive forward 24.75 inches
+			gyroTurn(-90);																				//Turn 90 degrees counterclockwise
+			driveStraight(24.5);																	//Drive forward 24.5 inches
+			gyroTurn(-90);																				//Turn 90 degrees counterclockwise
+			driveStraight(-26);																		//Drive backwards 26 inches
 		}
-		if(drag == true){
-			gyroTurn(180);
-			while(nMotorEncoder[L] > -sonarTicks){
-				motor[L] = -80;
-				motor[R] = -80;
-			}
-			motor[L] = 0;
-			motor[R] = 0;
-			clearDrive();
-			servo[Hook] = 0;
-			wait10Msec(100);
-			while(nMotorEncoder[L] < sonarTicks){
-				motor[L] = 80;
+		if(drag == true){																				//If the rolling goal is to be dragged by the robot
+			gyroTurn(180);																				//Turn 180 degrees clockwise
+			SonarDrive(10);																				//Drive until rear sonar sensor detects rolling goal
+			servo[Hook] = 0;																			//Lower hook to drag goal
+			wait10Msec(100);																			//Pause program for 1 second
+			while(nMotorEncoder[L] < sonarTicks){									//Drive straight to cancel out amount driven to back into goal
+				motor[L] = 80;																			//Right and Left motors at 80% power
 				motor[R] = 80;
 			}
-			motor[L] = 0;
+			motor[L] = 0;																					//Stop motors after driving conditions met
 			motor[R] = 0;
-			clearDrive();
-			gyroTurn(-45);
-			driveStraight(102);
-			gyroTurn(-135);
-			driveStraight(-10);
-			servo[Hook] = 120;
+			clearDrive();																					//Clears the encoders for driving motors
+			gyroTurn(45);																					//Turn 45 degrees clockwise
+			driveStraight(102);																		//Drive straight 102 inches to parking zone
+			gyroTurn(-45);																				//Turn 45 degrees counter clockwise
+			driveStraight(10);																		//Drive straight 10 inches
+			gyroTurn(180);																				//Turn 180 degrees clockwise
+			servo[Hook] = 120;																		//Release Hook
+			wait10Msec(100);
 		}
 	}
-	if(startArea == false){
-		if(goal == true){
-			gyroTurn(-30);
-			driveStraight(125);
-			gyroTurn(30);
-			SonarDrive(10);
-			servo[ArmJoint] = 0;
-			wait10Msec(150);
-			if(drag == true){
-				driveStraight(-10);
-				gyroTurn(180);
-				driveStraight(-10);
-				servo[Hook] = 0;
-				while(nMotorEncoder[L] < sonarTicks){
-					motor[L] = 80;
+	if(startArea == false){																		//If the robot starts in the parking zone
+		if(goal == true){																				//If the rolling goal is selected to be scored in
+			gyroTurn(30);																					//Turn 30 degrees clockwise
+			driveStraight(125);																		//Drive straight 125 inches
+			gyroTurn(-30);																				//Turn 30 degrees counter clockwise
+			driveStraight(24);																		//Drive straight 24 inches to 30cm goal
+			while(armLevel != 0 || slideDone != 0){}							//While neither the linear slide nor arm are fully extended
+			if(armLevel == 0 && slideDone == 0){									//If both are raised
+				servo[ArmJoint] = 0;																//Dump balls
+				wait10Msec(50);																			//Pause program for 1.5 seconds to allow servo to move
+			}
+			if(drag == true){																			//If dragging is selected as an autonomous task
+				driveStraight(-10);																	//Drive backwards 10 inches to gain adequate room to turn
+				gyroTurn(180);																			//Turn 180 degrees clockwise
+				SonarDrive(10);																			//Drive backwards until sonar sensor finds rolling goal
+				servo[Hook] = 0;																		//Lower hook fully to drag rolling goal
+				wait10Msec(100);
+				while(nMotorEncoder[L] < sonarTicks){								//Drive to cancel out sensor drive
+					motor[L] = 80;																		//Left and Right motors at 80% power
 					motor[R] = 80;
 				}
-				motor[L] = 0;
+				motor[L] = 0;																				//Stop Left and Right motors
 				motor[R] = 0;
-				clearDrive();
-				driveStraight(125);
-				gyroTurn(-150);
+				clearDrive();																				//Clear encoders for drive motors
+				gyroTurn(30);																				//Turn 30 degrees clockwise
+				driveStraight(125);																	//Drive Straight for 125 inches
+				gyroTurn(150);																			//Turn 150 degrees clockwise and turn goal into parking area
+				servo[Hook] = 120;																	//Release hook's grasp on goal
+				wait10Msec(100);																		//Wait 1 second to allow servo to move
 			}
-			if(kickstand == true){
-				while(nMotorEncoder[L] > -sonarTicks){
-					motor[L] = -80;
-					motor[R] = -80;
-				}
-				motor[L] = 0;
-				motor[R] = 0;
-				clearDrive();
-				gyroTurn(-30);
-				driveStraight(-42);
-				gyroTurn(-60);
-				driveStraight(-33);
+			if(kickstand == true){																//If the kickstand is selected to be knocked down
+				driveStraight(-24);																	//Drive backwards 24 inches
+				gyroTurn(30);																				//Turn 30 degrees clockwise
+				driveStraight(-42);																	//Drive backwards 42 inches
+				gyroTurn(60);																				//Turn 60 degrees clockwise
+				driveStraight(-33);																	//Drive backwards 33 inches
 			}
 		}
-		if(goal == false){
-			driveStraight(48);
-			
+		if(goal == false){																			//If the center goal is selected to be scored in
+			driveStraight(48);																		//Drive forward 48 inches
+			gyroTurn(90);																					//Turn 90 degrees counter clockwise
 		}
 	}
-	if(goal == false || kickstand == true){
-		IRDrive(-5);
-		if(IRDetection == false){
-			driveStraight(-5);
-			gyroTurn(-45);
-			IRDrive(-10);
+	if(goal == false || kickstand == true){										//If the IR needs to be found (either kickstand or center goal are selected)
+		IRDrive(-5);																						//Drive backwards 5 inches, or until the IR beacon is across from the robot
+		if(IRDetection == false){																//If IR not found
+			driveStraight(-5);																		//Drive backwards 5 inches
+			gyroTurn(45);																					//Turn 45 degrees clockwise
+			IRDrive(-10);																					//Drive backwards 10 inches, or until the IR beacon is across from the robot
 		}
-		if(IRDetection == false){
-			driveStraight(-5);
-			gyroTurn(-45);
-			IRDrive(-10);
+		if(IRDetection == false){																//If IR not found
+			driveStraight(-5);																		//Drive backwards 5 inches
+			gyroTurn(45);																					//Turn 45 degrees clockwise
+			IRDrive(-10);																					//Drive backwards 10 inches, or until the IR beacon is across from the robot
 		}
-		if(IRDetection == true
+		if(IRDetection == true																	//If the IR beacon is across from the robot and the center goal must be scored in
 			&& goal == false){
-			StartTask(armProcessHigh);
-			StartTask(raiseLinearSlide);
-			gyroTurn(90);
-			SonarDrive(10);
-			servo[autoArm] = 0;
-			wait10Msec(100);
-			StartTask(lowerLinearSlide);
-			if(kickstand == true){
-				servo[autoArm] = 120;
-				driveStraight(-10);
-				gyroTurn(-90);
+			StartTask(armProcessHigh);														//Begin proceess to raise arm fully
+			StartTask(raiseLinearSlide);													//Begin process to raise linear slide fully
+			gyroTurn(-90);																				//Turn 90 degrees counter clockwise
+			driveStraight(10);																		//Drive forward 10 inches (to center goal)
+			while(armLevel != 0 || slideDone != 0){}							//While neither the linear slide nor arm are fully extended
+			if(armLevel == 0 && slideDone == 0){									//If both arm and linear slide are raise fully
+				servo[autoArm] = 0;																	//Raise Autonomous Arm
+				wait10Msec(150);																		//Pause to allow arm to raise
+			}
+			StartTask(lowerLinearSlide);													//Begin to lower linear slide
+			if(kickstand == true){																//If the kickstand needs to be knocked down
+				servo[autoArm] = 120;																//Set autonomous arm to neutral-mid
+				driveStraight(-10);																	//Drive backwards 10 inches
+				gyroTurn(-90);																			//Turn 90 degrees counter clockwise
 			}
 		}
-		if(kickstand == true){
-			driveStraight(-13);
-			gyroTurn(-90);
-			driveFullPwr(-25);
+		if(kickstand == true){																	//If the kickstand needs to be knocked down
+			driveStraight(-13);																		//Drive backwards 13 inches
+			gyroTurn(90);																					//Turn 90 degrees clockwise
+			driveFullPwr(-25);																		//Drive at full power (to knock down kickstand)
 		}
 	}
 }
