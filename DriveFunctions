@@ -71,8 +71,8 @@ void IRDrive(int in){																				//drives robot a set distance or until 
 }
 void SonarDrive(int val){
 	while(SensorValue[Sonar] > val){
-		motor[L] = 60;
-		motor[R] = 60;
+		motor[L] = -60;
+		motor[R] = -60;
 	}
 	motor[L] = 0;
 	motor[R] = 0;
