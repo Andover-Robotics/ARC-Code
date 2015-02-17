@@ -1,35 +1,37 @@
 
 int linearTicks = 2903;																			//number of ticks to raise linear slide
 int armTicks = 120;																					//number of ticks to raise arm 1 degree
-short armLevel = 0;
-bool slideDone = false;
+float armLevel = 0;
+short slideDone = 0;
 
 void clearLift(){                                         	//clears all encoders
   nMotorEncoder[LinearSlide] = 0;
   nMotorEncoder[ArmMotor] = 0;
 }
 task raiseLinearSlide(){
+	slideDone = 1;
 	while(nMotorEncoder[LinearSlide] < linearTicks){
 			motor[LinearSlide] = 80;
 	}
 	motor[LinearSlide] = 0;
-	slideDone = true;
+	slideDone = 2;
 	clearLift();
 }
 task lowerLinearSlide(){
+	slideDone = 1;
 	while(nMotorEncoder[LinearSlide] > -linearTicks){
 			motor[LinearSlide] = 80;
 	}
 	motor[LinearSlide] = 0;
-	slideDone = true;
+	slideDone = 2;
 	clearLift();
 }
 task killSlide(){
 	while(true){
-		if(slideDone == true){
+		if(slideDone == 2){
 			StopTask(raiseLinearSlide);
 			StopTask(lowerLinearSlide);
-			slideDone = false;
+			slideDone = 0;
 		}
 		else{}
 	}
@@ -64,6 +66,7 @@ void moveArm(int deg){
 	motor[ArmMotor] = 0;
 }
 task armProcessLow(){
+	armLevel = 0.5;
 	while(nMotorEncoder[ArmMotor] < 90*armTicks){
 		motor[ArmMotor] = 80;
 		servo[ArmJoint] = 240 - (nMotorEncoder[ArmMotor]/120);
@@ -73,6 +76,7 @@ task armProcessLow(){
 	armLevel = 1;
 }
 task armProcessHigh(){
+	armLevel = 1.5;
 	while(nMotorEncoder[ArmMotor] < 115*armTicks){
 		motor[ArmMotor] = 80;
 		servo[ArmJoint] = 240 - (nMotorEncoder[ArmMotor]/120);
@@ -91,6 +95,6 @@ task armStop(){
 			StopTask(armProcessHigh);
 			armLevel = 0;
 		}
-		if(armLevel == 0){}
+		if(armLevel != 1 && armLevel != 2){}
 	}
 }
