@@ -21,7 +21,7 @@ Cascade Effect
 Team 4410 ARC Lightning
 Autonomous Code
 Christopher Zhao
-version 1.0.2, 2/16/2015
+version 1.0.4, 2/18/2015
 */
 
 #include "JoystickDriver.c"																	//Contains waitForStart(), required for FCS field and competition
@@ -48,7 +48,7 @@ void clear(){																								//Clears all encoders
 void initiallize(){																					//Function detailing all initial routines
 	servoChangeRate[ArmJoint] = 5;														//Sets base change rate of ArmJoint (attached to bucket) to 5 positions/20 milliseconds
 	servoChangeRate[Hook] = 15;																//Sets base change rate of Hook to 15 positions/20 milliseconds
-	servo[ArmJoint] = 240;																		//Sets ArmJoint to neutral position in dock
+	//servo[ArmJoint] = 240;																		//Sets ArmJoint to neutral position in dock
 	servo[Hook] = 120;																				//Sets Hook to neutral position, raised up
 	servo[autoArm] = 254;																			//Sets Autonomous Arm to neutral position, angled below main arm
 	clear();																									//Clears all encoders
@@ -132,8 +132,8 @@ task main()
 	bool kickstand = taskBool[2];
 	bool drag = taskBool[3];
 	initiallize();																						//Begin initiallization
-	StartTask(armStop);																				//Begin background process to kill any tasks involving arms as soon as they finish
-	StartTask(killSlide);																			//Begin background process to kill any tasks involving the linear slide as soon as they finish
+	//StartTask(armStop);																				//Begin background process to kill any tasks involving arms as soon as they finish
+	//StartTask(killSlide);																			//Begin background process to kill any tasks involving the linear slide as soon as they finish
 	if(goal == true){																					//If a rolling goal is selected as the goal type to be scored in
 		StartTask(armProcessLow);																//Begin background process to raise the arm to the minor position (~90 degrees from neutral)
 	}
@@ -143,11 +143,11 @@ task main()
 		if(goal == true){																				//If a rolling goal is selected as the goal type to be scored in
 			StartTask(raiseLinearSlide);													//Begin background process to raise the linear slide to full extension
 			driveStraight(19);																		//Drive straight 19 inches to 60cm rolling goal
-			while(armLevel != 0 || slideDone != 0){}							//While neither the linear slide nor arm are fully extended
-			if(armLevel == 0 && slideDone == 0){									//If both are raised
+			//while(armLevel != 0 || slideDone != 0){}							//While neither the linear slide nor arm are fully extended
+			//if(armLevel == 0 && slideDone == 0){									//If both are raised
 				servo[ArmJoint] = 0;																//Dump balls
 				wait10Msec(50);																			//Pause program for 1.5 seconds to allow servo to move
-			}
+			//}
 			StartTask(lowerLinearSlide);													//Begin to lower the linear slide
 			//moveArm(-90);																				//Lower the arm (omit)
 			driveStraight(-19);																		//Drive backwards 19 inches back to the midpoint
@@ -183,15 +183,15 @@ task main()
 	}
 	if(startArea == false){																		//If the robot starts in the parking zone
 		if(goal == true){																				//If the rolling goal is selected to be scored in
-			gyroTurn(30);																					//Turn 30 degrees clockwise
-			driveStraight(125);																		//Drive straight 125 inches
+			gyroTurn(24);																					//Turn 30 degrees clockwise
+			driveStraight(71);																		//Drive straight 125 inches
 			gyroTurn(-30);																				//Turn 30 degrees counter clockwise
-			driveStraight(24);																		//Drive straight 24 inches to 30cm goal
-			while(armLevel != 0 || slideDone != 0){}							//While neither the linear slide nor arm are fully extended
-			if(armLevel == 0 && slideDone == 0){									//If both are raised
-				servo[ArmJoint] = 0;																//Dump balls
+			driveStraight(69);																		//Drive straight 24 inches to 30cm goal
+			//while(armLevel != 0 || slideDone != 0){}							//While neither the linear slide nor arm are fully extended
+			//if(armLevel == 0 && slideDone == 0){									//If both are raised
+				servo[ArmJoint] = 10;																//Dump balls
 				wait10Msec(50);																			//Pause program for 1.5 seconds to allow servo to move
-			}
+			//}
 			if(drag == true){																			//If dragging is selected as an autonomous task
 				driveStraight(-10);																	//Drive backwards 10 inches to gain adequate room to turn
 				gyroTurn(180);																			//Turn 180 degrees clockwise
@@ -212,52 +212,59 @@ task main()
 				wait10Msec(100);																		//Wait 1 second to allow servo to move
 			}
 			if(kickstand == true){																//If the kickstand is selected to be knocked down
-				driveStraight(-24);																	//Drive backwards 24 inches
+				driveStraight(-69);																	//Drive backwards 24 inches
 				gyroTurn(30);																				//Turn 30 degrees clockwise
-				driveStraight(-42);																	//Drive backwards 42 inches
-				gyroTurn(60);																				//Turn 60 degrees clockwise
-				driveStraight(-33);																	//Drive backwards 33 inches
+				driveStraight(-40);																	//Drive backwards 42 inches
+				gyroTurn(50);																				//Turn 60 degrees clockwise
+				driveStraight(-10);																	//Drive backwards 33 inches
 			}
 		}
 		if(goal == false){																			//If the center goal is selected to be scored in
-			driveStraight(48);																		//Drive forward 48 inches
-			gyroTurn(90);																					//Turn 90 degrees counter clockwise
+			driveStraight(23);																		//Drive forward 48 inches
+			gyroTurn(87);																					//Turn 90 degrees counter clockwise
 		}
 	}
 	if(goal == false || kickstand == true){										//If the IR needs to be found (either kickstand or center goal are selected)
 		IRDrive(-5);																						//Drive backwards 5 inches, or until the IR beacon is across from the robot
 		if(IRDetection == false){																//If IR not found
-			driveStraight(-5);																		//Drive backwards 5 inches
-			gyroTurn(45);																					//Turn 45 degrees clockwise
-			IRDrive(-10);																					//Drive backwards 10 inches, or until the IR beacon is across from the robot
+			driveStraight(-25);																		//Drive backwards 5 inches
+			gyroTurn(27);																					//Turn 45 degrees clockwise
+			driveStraight(-5);
+			IRDrive(-4);																					//Drive backwards 10 inches, or until the IR beacon is across from the robot
 		}
 		if(IRDetection == false){																//If IR not found
-			driveStraight(-5);																		//Drive backwards 5 inches
-			gyroTurn(45);																					//Turn 45 degrees clockwise
+			driveStraight(-25);																		//Drive backwards 5 inches
+			gyroTurn(40);																					//Turn 45 degrees clockwise
+			//driveStraight(-10);
+			//clearDrive();
+			//wait10Msec(10);
 			IRDrive(-10);																					//Drive backwards 10 inches, or until the IR beacon is across from the robot
 		}
 		if(IRDetection == true																	//If the IR beacon is across from the robot and the center goal must be scored in
 			&& goal == false){
 			StartTask(armProcessHigh);														//Begin proceess to raise arm fully
 			StartTask(raiseLinearSlide);													//Begin process to raise linear slide fully
-			gyroTurn(-90);																				//Turn 90 degrees counter clockwise
+			driveStraight(-3);
+			gyroTurn(-70);																				//Turn 90 degrees counter clockwise
 			driveStraight(10);																		//Drive forward 10 inches (to center goal)
-			while(armLevel != 0 || slideDone != 0){}							//While neither the linear slide nor arm are fully extended
-			if(armLevel == 0 && slideDone == 0){									//If both arm and linear slide are raise fully
+			//while(armLevel != 0 || slideDone != 0){}							//While neither the linear slide nor arm are fully extended
+			//if(armLevel == 0 && slideDone == 0){									//If both arm and linear slide are raise fully
 				servo[autoArm] = 0;																	//Raise Autonomous Arm
 				wait10Msec(150);																		//Pause to allow arm to raise
-			}
+			//}
 			StartTask(lowerLinearSlide);													//Begin to lower linear slide
 			if(kickstand == true){																//If the kickstand needs to be knocked down
 				servo[autoArm] = 120;																//Set autonomous arm to neutral-mid
 				driveStraight(-10);																	//Drive backwards 10 inches
-				gyroTurn(-90);																			//Turn 90 degrees counter clockwise
+				gyroTurn(70);																				//Turn 90 degrees counter clockwise
+				driveStraight(3);
 			}
 		}
-		if(kickstand == true){																	//If the kickstand needs to be knocked down
-			driveStraight(-13);																		//Drive backwards 13 inches
-			gyroTurn(90);																					//Turn 90 degrees clockwise
-			driveFullPwr(-25);																		//Drive at full power (to knock down kickstand)
+		if(kickstand == true &&
+			IRDetection == true){																	//If the kickstand needs to be knocked down
+			driveStraight(16);																		//Drive backwards 13 inches
+			gyroTurn(70);																					//Turn 90 degrees clockwise
+			driveFullPwr(-70);																		//Drive at full power (to knock down kickstand)
 		}
 	}
 }
