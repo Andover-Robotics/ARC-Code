@@ -1,32 +1,33 @@
-
 int linearTicks = 2903;																			//number of ticks to raise linear slide
 int armTicks = 120;																					//number of ticks to raise arm 1 degree
-float armLevel = 0;
-short slideDone = 0;
+//float armLevel = 0;
+//short slideDone = 0;
 
 void clearLift(){                                         	//clears all encoders
   nMotorEncoder[LinearSlide] = 0;
   nMotorEncoder[ArmMotor] = 0;
 }
 task raiseLinearSlide(){
-	slideDone = 1;
+	//slideDone = 1;
 	while(nMotorEncoder[LinearSlide] < linearTicks){
 			motor[LinearSlide] = 80;
 	}
 	motor[LinearSlide] = 0;
-	slideDone = 2;
+	//slideDone = 2;
 	clearLift();
 }
 task lowerLinearSlide(){
-	slideDone = 1;
+	StopTask(raiseLinearSlide);
+	//slideDone = 1;
 	while(nMotorEncoder[LinearSlide] > -linearTicks){
 			motor[LinearSlide] = 80;
 	}
 	motor[LinearSlide] = 0;
-	slideDone = 2;
+	//slideDone = 2;
 	clearLift();
+	StopTask(lowerLinearSlide);
 }
-task killSlide(){
+/*task killSlide(){
 	while(true){
 		if(slideDone == 2){
 			StopTask(raiseLinearSlide);
@@ -35,25 +36,7 @@ task killSlide(){
 		}
 		else{}
 	}
-}
-void tRaiseArm(){
-	for(int x = 0; x < 3; x++){
-		motor[ArmMotor] = 80;
-		servo[ArmJoint] += -20;
-		wait10Msec(120);
-	}
-	motor[ArmMotor] = 0;
-	clearLift();
-}
-void tLowerArm(){
-	for(int x = 0; x < 3; x++){
-		motor[ArmMotor] = -80;
-		servo[ArmJoint] += 20;
-		wait10Msec(110);
-	}
-	motor[ArmMotor] = 0;
-	clearLift();
-}
+}*/
 void moveArm(int deg){
 	while(nMotorEncoder[ArmMotor] < deg*armTicks && deg > 0){
 		motor[ArmMotor] = 80;
@@ -66,26 +49,26 @@ void moveArm(int deg){
 	motor[ArmMotor] = 0;
 }
 task armProcessLow(){
-	armLevel = 0.5;
+	//armLevel = 0.5;
 	while(nMotorEncoder[ArmMotor] < 90*armTicks){
 		motor[ArmMotor] = 80;
 		servo[ArmJoint] = 240 - (nMotorEncoder[ArmMotor]/120);
 		servo[autoArm] = 254 - (nMotorEncoder[ArmMotor]/120);
 	}
 	motor[ArmMotor] = 0;
-	armLevel = 1;
+	//armLevel = 1;
 }
 task armProcessHigh(){
-	armLevel = 1.5;
+	//armLevel = 1.5;
 	while(nMotorEncoder[ArmMotor] < 115*armTicks){
 		motor[ArmMotor] = 80;
 		servo[ArmJoint] = 240 - (nMotorEncoder[ArmMotor]/120);
 		servo[autoArm] = 254 - (nMotorEncoder[ArmMotor]/120);
 	}
 	motor[ArmMotor] = 0;
-	armLevel = 2;
+	//armLevel = 2;
 }
-task armStop(){
+/*task armStop(){
 	while(true){
 		if(armLevel == 1){
 			StopTask(armProcessLow);
@@ -97,4 +80,4 @@ task armStop(){
 		}
 		if(armLevel != 1 && armLevel != 2){}
 	}
-}
+}*/
