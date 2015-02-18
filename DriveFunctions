@@ -1,5 +1,4 @@
 
-
 float ipt = 12;//8.7266463;																	//inches driven per 1 thousand ticks																								Test this value, should be more accurate
 bool IRDetection = false;																		//denotes whether or not IR has been detected
 int sonarTicks = 0;
@@ -22,7 +21,7 @@ void driveStraight(int in){                           			//function which drives
     }
   motor[L] = 0;                                       			//Stops left motor
   motor[R] = 0;                                       			//Stops right motor
-  wait10Msec(10);	                                    			//waits .1 seconds
+  wait10Msec(25);	                                    			//waits .1 seconds
   clearDrive();                                            	//clears encoders
 }
 void driveFullPwr(int in){
@@ -38,7 +37,7 @@ void driveFullPwr(int in){
     }
   motor[L] = 0;                                       			//Stops left motor
   motor[R] = 0;                                       			//Stops right motor
-  wait10Msec(10);	                                    			//waits .1 seconds
+  wait10Msec(25);	                                    			//waits .1 seconds
   clearDrive();                                            	//clears encoders
 }
 void hardTurn(int deg){                                   	//function for turning # of degrees, deg
@@ -54,19 +53,21 @@ void hardTurn(int deg){                                   	//function for turnin
     }
    motor[L] = 0;
    motor[R] = 0;
+   wait10Msec(25);
    clearDrive();
 }
 void IRDrive(int in){																				//drives robot a set distance or until IR is detected, does not drive when IR already found
-	while(nMotorEncoder[L] < (in/ipt)*1000
+	while(nMotorEncoder[L] > (in/ipt)*1000
 			&& SensorValue[IRSensor] != 5 ){											//while the encoder is less than 1000 * desired inches/inches per thousand
-			motor[L] = 80;																				//Left motor drive forward
-			motor[R] = 80;																				//Right motor drive forward
+			motor[L] = -80;																				//Left motor drive forward
+			motor[R] = -80;																				//Right motor drive forward
 		}
 	motor[L] = 0;																							//stop Left motor
 	motor[R] = 0;																							//stop Right motor
 	if(SensorValue[IRSensor] == 5){
 		IRDetection = true;
 	}
+	wait10Msec(25);
 	clearDrive();
 }
 void SonarDrive(int val){
@@ -77,6 +78,7 @@ void SonarDrive(int val){
 	motor[L] = 0;
 	motor[R] = 0;
 	sonarTicks = nMotorEncoder[L];
+	wait10Msec(25);
 	clearDrive();
 }
 void hardTurn(int deg){                                   			//function for turning # of degrees, deg
@@ -95,24 +97,25 @@ void hardTurn(int deg){                                   			//function for turn
    wait10Msec(10);
    clearDrive();
 }
-void gyroTurn(int deg){
+void gyroTurn(float deg){
 	float turnAmount = 0;
 	while(turnAmount < deg//clockwise
 		&& deg > 0){
 			nxtDisplayCenteredTextLine(3, "%i", turnAmount);
-			motor[L] = 60;
-			motor[R] = -60;
-			turnAmount += (SensorValue[Gyro] - nullValue) * 0.001;
-			wait1Msec(1);
+			motor[L] = 50;
+			motor[R] = -50;
+			turnAmount += (SensorValue[Gyro] - nullValue) * 0.03;
+			wait1Msec(30);
 		}
 	while(turnAmount > deg//counterclockwise
 		&& deg < 0){
-			motor[L] = -60;
-			motor[R] = 60;
+			motor[L] = -50;
+			motor[R] = 50;
 			turnAmount += (SensorValue[Gyro] - nullValue) * 0.001;
 			wait1Msec(1);
 		}
 	motor[L] = 0;
 	motor[R] = 0;
+	wait10Msec(25);
 	clearDrive();
 }
