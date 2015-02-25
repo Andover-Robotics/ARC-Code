@@ -12,243 +12,33 @@
 #pragma config(Servo,  srvo_S1_C4_5,    servo5,               tServoNone)
 #pragma config(Servo,  srvo_S1_C4_6,    servo6,               tServoNone)
 
-#include "JoystickDriver.c"
-
-#define FORWARDS 0
-#define BACKWARDS 180
-#define LEFT -90
-#define RIGHT 90
-
-//Directions relative to below coordinate plane
-//NEGATIVE DEGREES ---------- || ++++++++ POSITIVE DEGREES
-//								 ---------- || ++++++++
-//								 ---------- || ++++++++
-//									 				 ~~~~
-//													 ~~~~
-//													 ~~~~
-
-#define ROBOT_SPEED 50
-#define BACK_WHEEL_DISTANCE 3
-
-int convertToTicks(int ticks){ return 0; }
-
-void turn (int dir_)
-{
-	int angle = abs (dir_);
-
-	if (dir_ < 0)
-	{
-		float cm = (2*pi*WHEEL_RADIUS) * angle/360;
-		int ticks = ((cm *1440)/(WHEEL_CIRCUMFERENCE);
-		nMotorEncoderTarget[L] = -ticks;
-		nMotorEncoderTarget [R] = ticks;
-		motor[L] = -50;
-		motor[R] = 50;
-	}
-	if (dir_ > 0)
-	{
-		float cm = (2*pi*WHEEL_RADIUS) * angle/360;
-		int ticks = (1440/(21.9911485751/cm);
-		nMotorEncoderTarget[L] = ticks;
-		nMotorEncoderTarget [R] = -ticks;
-		motor[L] = 50;
-		motor[R] = -50;
-	}
+void DriveOffRamp () {
+	//Drives off the ramp
+  motor[L] = motor[R] = 50;
+	wait1Msec(3500);
+	motor[L] = motor[R] = 0;
 }
 
-void turn (int dir) {
-	float arcLength = degreesToRadians(abs(dir))*BACK_WHEEL_DISTANCE;
-	if (dir < 0) { //LEFT
-		nMotorEncoderTarget[LEFT] = convertToTicks(arcLength);
-		motor[RIGHT] = ROBOT_SPEED;
-		motor[LEFT] = -ROBOT_SPEED;
-		
-	} else if (dir > 0) { //RIGHT
-		nMotorEncoderTarget[LEFT] = convertToTicks(arcLength);
-		motor[RIGHT] = -ROBOT_SPEED;
-		motor[LEFT] = ROBOT_SPEED;
-	} else {} //Do nothing
+/** (+) = right
+		(-) = left **/
+void Turn (int degrees) {
+	int d = sgn(degrees);
+	motor[L] = d *  50;
+	motor[R] = d * -50;
+	wait1Msec(abs((int) (1010. * degrees / 90.)));
+	motor[L] = motor[R] = 0;
 }
 
-//Distance is in cm
-//Direction is according to the specifications
-//shown by the top of the page
-void move (int dir, int distance) {
-	int ticks = convertToTicks(distance);
-
-	switch (dir) {
-		case FORWARDS:
-		nMotorEncoderTarget[L] = ticks;
-		motor[L] = motor[R] = ROBOT_SPEED;
-		break;
-		
-		case BACKWARDS:
-		nMotorEncoderTarget[L] = ticks;
-		motor[L] = motor[R] = -ROBOT_SPEED;
-		break;
-		
-		case LEFT:
-		turn(LEFT);
-		nMotorEncoderTarget[L] = ticks;
-		motor[L] = motor[R] = ROBOT_SPEED;
-		break;
-		
-		case RIGHT:
-		turn(RIGHT);
-		nMotorEncoderTarget[L] = ticks;
-		motor[L] = motor[R] = ROBOT_SPEED;
-		break;
-	}
-}
-
-//Makes the robot drive off of the ramp
-task driveOffRamp {
-	int distance0;
-	move(FORWARDS,distance0);
-}
-
-//Raise the slide
-task raiseSlide {
-	motor[L] = motor[R] = 50;
-	int time;
-	wait1Msec(time);
+void RaiseSlide () {
+	//Raises the linear slide
+	motor[slide] = -50;
+	wait1Msec(1000);
+	motor[slide] = 0;
 }
 
 task main()
 {
-	//Parallelize the two tasks
-	//In this way the robot is able
-	//To perform multiple tasks at once
-
-	StartTask(driveOffRamp); //Drive off of the Ramp
-	StartTask(raiseSlide); //Raise the slide concurrently
-}
-
-//Define Util functions
-
-//Resets all encoders, and stops motors
-void clear () {
-   //TODO Clear all motor encoders, and stop all motors
-	motor[L] = motor[R] = 0;
-}
-
-//Conversion factor between ticks and cm
-//ticks = cm * tickRatio
-float tickRatio;
-
-//Converts given distance (cm) into ticks, rounding to the nearest integer, and //returns the result
-int convertToTicks (int cm) {
-   return (int) (cm * tickRatio + 0.5);
-}
-
-//Turns through the given angle (degrees).
-//Positive Angle -> LEFT
-//Negative Angle -> RIGHT
-
-
-
-//Moves the robot in given direction (relative to its current direction) for given //distance (cm)
-//TODO  pid adjustments for tetrix motors
-void move(int direction,int distance) {
-   turn(direction);
-   int ticks = convertToTicks(distance);
-   clear();
-
-   while (nMotorEncoder[RIGHT_MOTOR] != ticks) {
-      motor[RIGHT] = 50;
-      motor[LEFT] = 50;
-   }
-
-   clear();
-}
-
-//Define strategy
-
-//Initialize all necessary fields and set mechanical components to their inital //positions
-void initialization () {
-   //TODO
-}
-
-//Executes the autonomous logic
-void run () {
-
-}
-
-/* OUTDATED IR STUFF
-   //Ramp Version
-   
-   //Lower Area Version
-   {
-      Move Forward
-      if IR Beacon is in Sector 5 then
-         int a  = ; //The Amount of ticks to move
-         int b = ;
-         move(LEFT,a);
-         move(UP,b);
-         
-         //*Knocks over pole*
-      else
-         int a = ;
-         int b = ;
-         move(LEFT,a);
-         move(UP,b);
-         turn(RIGHT);
-         
-         if IR Beacon is in Sector 5 then
-            turn(RIGHT);
-            int c = ;
-            int d = ; //d ~= a, but maybe is slightly bigger
-            move(DOWN,c);
-            move(RIGHT,d);
-            
-            //*Knocks over pole*
-         else
-            int c = ;
-            int d = ;
-            move(RIGHT,c);
-            move(135, d);
-   }
-   
-*/
-}
-
-task main {
-   //waitForStart();
-//The linear slide is raised
- 			nMotorEncoder[slide] = 0;
- 			nMotorEncoderTarget[slide] = 3 * REVOLUTION;
-			motor[slide] = 30;
-			
- 	 //The motor encoders are reset
- 			nMotorEncoder[L] = 0;
- 			nMotorEncoder[R] = 0;
- 			
- 	 //The motors' target is set
- 			nMotorEncoderTarget[L] = DISTANCE_FROM_START_TO_60CM_GOAL_IN_TICKS;
- 			nMotorEncoderTarget[R] = DISTANCE_FROM_START_TO_60CM_GOAL_IN_TICKS;
- 	 
- 	 //The motors run until target is reached
- 			motor[L] = 50;
- 			motor[R] = 50;
- 			
- 	 //The motor encoders are reset
- 			nMotorEncoder[L] = 0;
- 			nMotorEncoder[R] = 0;
- 			
- 	 //The goal mechanism is attatched to the 60cm goal		
- 			servo[release] += 240; //170 degrees represented in servo positional value
- 			
- 	 //The robot attempts to score a ball into the 60cm goal
- 			nMotorEncoderTarget[belt] = 0;
- 			nMotorEncoderTarget[belt] = 0.5 * REVOLUTION;
- 			motor[belt] = 18;
- 			
- 	 /*The robot turns the amount of degrees in the angle formed by the wall up until the 60cm goal, 
- 	 and the auxillary line from the4 goal to the parking zone*/
- 			turn(RIGHT,50); //absolute guess
- 			
- 	 //The robot moves to the parking zone
- 			nMotorEncoderTarget[L] = 1234; //unknown; distance from 60cm goal to parking zone in ticks
- 			nMotorEncoderTarget[R] = 1234; //^
-
+	DriveOffRamp();
+	Turn(180);
+	RaiseSlide();
 }
