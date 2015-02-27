@@ -5,7 +5,7 @@
 #pragma config(Motor,  mtr_S1_C2_2,     slide,         tmotorTetrix, openLoop, encoder)
 #pragma config(Motor,  mtr_S1_C3_1,     sweep,         tmotorTetrix, openLoop)
 #pragma config(Motor,  mtr_S1_C3_2,     none,          tmotorTetrix, openLoop)
-#pragma config(Servo,  srvo_S1_C4_1,    release,              tServoStandard)
+#pragma config(Servo,  srvo_S1_C4_1,    release,               tServoStandard)
 #pragma config(Servo,  srvo_S1_C4_2,    servo2,               tServoNone)
 #pragma config(Servo,  srvo_S1_C4_3,    servo3,               tServoNone)
 #pragma config(Servo,  srvo_S1_C4_4,    servo4,               tServoNone)
@@ -21,6 +21,7 @@ void DriveOffRamp () {
 
 /** (+) = right
 		(-) = left **/
+
 void Turn (int degrees) {
 	int d = sgn(degrees);
 	motor[L] = d *  50;
@@ -32,7 +33,7 @@ void Turn (int degrees) {
 void RaiseSlide () {
 	//Raises the linear slide
 	motor[slide] = -50;
-	wait1Msec(1000);
+	wait1Msec(1750);
 	motor[slide] = 0;
 }
 
@@ -42,3 +43,47 @@ task main()
 	Turn(180);
 	RaiseSlide();
 }
+
+/* ATTEMPT AT ACHIEVING THE PREVIOUS STRATEGY
+void Drive1 () {
+	 motor[L] = motor[R] = 50;
+	 wait1Msec(2000);
+	 motor[L] = motor[R] = 0;
+}
+
+void Drive2 () {
+	 motor[L] = motor[R] = -50;
+	 wait1Msec(500);
+	 motor[L] = motor[R] = 0;
+}
+
+void Score () {
+	motor[belt] = 18;
+	wait1Msec(5000);
+	motor[belt] = 0;
+}
+
+void Latch () {
+		servo[release] += 240;
+}
+
+task main()
+{
+	RaiseSlide(); //robot raises linear slide 
+	wait1Msec(1000);
+	Drive1(); //robot drives off ramp 
+	wait1Msec(1000);
+	Turn(180); //robot turns 180 degrees
+	wait1Msec(1000);
+	Drive2(); //robot continues driving to the 60cm goal
+	wait1Msec(1000);
+	Latch(); //robot latches onto the 60cm goal
+	wait1Msec(1000);
+	Score(); //robot attempts to score into the 60cm goal 
+	wait1Msec(1000);
+	Turn(-125); //robot turns 125 degrees counterclockwise (DOES NOT WORK)
+	wait1Msec(1000);
+	DriveOffRamp(); //robot drives to the parking zone 
+	wait1Msec(1000);
+}
+*/
