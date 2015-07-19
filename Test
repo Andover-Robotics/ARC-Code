@@ -1,0 +1,35 @@
+(this is just some python code I'm testing with)
+
+import random
+import matplotlib.pyplot as plt
+def create_sample_and_target(sampleSize):
+    # create the sample-points
+    x_points = tuple([random.uniform(-1,1) for i in xrange(sampleSize)])
+    y_points = tuple([random.uniform(-1,1) for i in xrange(sampleSize)])
+    # create the target function from two random points:
+    x1_t = random.uniform(-1,1)
+    x2_t = random.uniform(-1,1)
+    y1_t = random.uniform(-1,1)
+    y2_t = random.uniform(-1,1)
+    m = (y2_t-y1_t)/(x2_t-x1_t)
+    b = y1_t-m * x1_t
+    # Evaluate if data-point is on right or left side of plane
+    results = map(lambda x,y: y > m * x + b,x_points,y_points)
+    results_to_num = [1 if result else -1 for result in results]
+    # Prepare for Plotting
+    above_x = [x_point for x_point, result in zip(x_points,results) if result]
+    above_y = [y_point for y_point, result in zip(y_points,results) if result]
+    below_x = [x_point for x_point, result in zip(x_points,results) if not result]
+    below_y = [y_point for y_point, result in zip(y_points,results) if not result]
+    fig = plt.figure() 
+    ax = fig.add_subplot(111)
+    ax.plot([-1,1],[-m+b,m + b])
+    ax.set_xlim([-1,1])
+    ax.set_ylim([-1,1])
+    ax.plot(x_points,y_points,'x')
+    ax.plot(above_x,above_y,'ro')
+    ax.plot(below_x,below_y,'bo')
+    plt.show()
+    return x_points, y_points, results_to_num, m, b
+    
+create_sample_and_target(10)
